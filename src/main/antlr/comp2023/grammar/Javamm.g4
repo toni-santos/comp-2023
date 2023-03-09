@@ -12,14 +12,14 @@ COMMENT_ALL : '/*' [.]* '*/' -> skip;
 COMMENT_LINE : '//' [.]* [\n]-> skip;
 
 program
-    : (importDeclaration)* classDeclariation EOF
+    : (importDeclaration)* classDeclaration EOF
     ;
 
 importDeclaration
     : 'import' ID ('.'ID)*';'
     ;
 
-classDeclariation
+classDeclaration
     : 'class' ID ('extends' ID)? '{' (varDeclaration)* (methodDeclaration)* '}'
     ;
 
@@ -28,8 +28,8 @@ varDeclaration
     ;
 
 methodDeclaration
-    : ('public')? type ID '(' ( type ID ( ',' type ID )* )? ')' '{' (varDeclaration)* (statement)* 'return' expression ';' '}'
-    | ('public')? 'static' 'void' 'main' '(' type '[' ']' ID ')' '{' (varDeclaration)* (statement)* '}' //TODO: Enforce type String later
+    : ('public')? type ID '(' ( type ID ( ',' type ID )* )? ')' '{' (varDeclaration)* (statement)* 'return' expression ';' '}' #GenericMethod
+    | ('public')? 'static' 'void' 'main' '(' type '[' ']' ID ')' '{' (varDeclaration)* (statement)* '}' #MainMethod //TODO: Enforce type String later
     ;
 
 type
@@ -44,7 +44,7 @@ statement
     | 'if' '(' expression ')' statement 'else' statement #IfElse
     | 'while' '(' expression ')' statement #While
     | expression ';' #RegularStatement
-    | type ID '=' expression ';' #DeclarationStatement
+    | type+ '=' expression ';' #DeclarationStatement
     | ID '['expression']' '=' expression ';' #ArrayStatement
     ;
 
@@ -56,8 +56,8 @@ expression
     | '!' expression #UnaryOp
     | expression op=('*' | '/') expression #BinaryOp
     | expression op=('+' | '-') expression #BinaryOp
-    | expression '<' expression #BinaryOp
-    | expression '&&' expression #BinaryOp
+    | expression op='<' expression #BinaryOp
+    | expression op='&&' expression #BinaryOp
     | 'new' 'int' '[' expression ']' #NewArray
     | 'new' ID '(' ')' #NewObject
     | INT #IntValue
