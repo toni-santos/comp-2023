@@ -41,6 +41,7 @@ public class Launcher {
         TestUtils.noErrors(parserResult.getReports());
 
         // ... add remaining stages
+        SimpleSymbolTable simpleSymbolTable = new SimpleSymbolTable(parserResult.getRootNode());
     }
 
     private static Map<String, String> parseArgs(String[] args) {

@@ -16,15 +16,15 @@ program
     ;
 
 importDeclaration
-    : 'import' ID ('.'ID)*';'
+    : 'import' name=ID ('.'name=ID)*';' #Import
     ;
 
 classDeclaration
-    : 'class' ID ('extends' ID)? '{' (varDeclaration)* (methodDeclaration)* '}'
+    : 'class' ID ('extends' ID)? '{' (varDeclaration)* (methodDeclaration)* '}' #Class
     ;
 
 varDeclaration
-    : type ID ';'
+    : type ID ';' #Var
     ;
 
 methodDeclaration
@@ -36,7 +36,7 @@ type
     : 'int' '[' ']' #IntArray
     | 'boolean' #Boolean
     | 'int' #Integer
-    | ID #Object
+    | value=ID #Object
     ;
 
 statement
@@ -60,9 +60,8 @@ expression
     | expression op='&&' expression #BinaryOp
     | 'new' 'int' '[' expression ']' #NewArray
     | 'new' ID '(' ')' #NewObject
-    | INT #IntValue
-    | 'true' #BooleanValue
-    | 'false'#BooleanValue
-    | ID #Identifier
-    | 'this' #Isto
+    | value=INT #IntValue
+    | value=('true' | 'false') #BooleanValue
+    | value=ID #Identifier
+    | 'this' #This
     ;
