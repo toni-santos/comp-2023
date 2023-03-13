@@ -16,27 +16,66 @@ program
     ;
 
 importDeclaration
-    : 'import' name=ID ('.'name=ID)*';' #Import
+    : 'import' importName ('.'importName)*';' #Import
+    ;
+
+importName
+    : value=ID
     ;
 
 classDeclaration
-    : 'class' ID ('extends' ID)? '{' (varDeclaration)* (methodDeclaration)* '}' #Class
+    : 'class' className ('extends' extendName)? '{' (varDeclaration)* (methodDeclaration)* '}' #Class
+    ;
+
+className
+    : value=ID
+    ;
+
+extendName
+    : value=ID
     ;
 
 varDeclaration
-    : type ID ';' #Var
+    : type value=ID ';'
     ;
 
 methodDeclaration
-    : ('public')? type ID '(' ( type ID ( ',' type ID )* )? ')' '{' (varDeclaration)* (statement)* 'return' expression ';' '}' #GenericMethod
-    | ('public')? 'static' 'void' 'main' '(' type '[' ']' ID ')' '{' (varDeclaration)* (statement)* '}' #MainMethod //TODO: Enforce type String later
+    : scope (mod)? type methodName '(' ( methodParam ( ',' methodParam )* )? ')' '{' (varDeclaration)* (statement)* (returnStatement)? '}' #GenericMethod
+    | scope (mod)? type 'main' '(' methodParam ')' '{' (varDeclaration)* (statement)* '}' #MainMethod //TODO: Enforce type String later
     ;
 
-type
-    : 'int' '[' ']' #IntArray
-    | 'boolean' #Boolean
-    | 'int' #Integer
-    | value=ID #Object
+methodParam
+    : type methodParamName
+    ;
+
+returnStatement
+    : 'return' expression ';'
+    ;
+
+methodName
+    : value=ID
+    ;
+
+methodParamName
+    : value=ID
+    ;
+
+scope
+    : 'public'
+    | 'private'
+    ;
+
+mod
+    : 'static'
+    ;
+
+type returns [Boolean isArray]
+    : 'int' '[' ']'{$isArray=true}
+    | 'boolean'
+    | 'int'
+    | 'void'
+    | value=ID
+    | value=ID '[' ']'{$isArray=true}
     ;
 
 statement
@@ -45,13 +84,13 @@ statement
     | 'while' '(' expression ')' statement #While
     | expression ';' #RegularStatement
     | type+ '=' expression ';' #DeclarationStatement
-    | ID '['expression']' '=' expression ';' #ArrayStatement
+    | value=ID '['expression']' '=' expression ';' #ArrayStatement
     ;
 
 expression
     : '(' expression ')' #Parenthesis
     | expression '[' expression ']' #ArraySubscript
-    | expression '.' ID '(' ( expression ( ',' expression )* )? ')' #MemberSelection
+    | expression '.' value=ID '(' ( expression ( ',' expression )* )? ')' #MemberSelection
     | expression '.' 'length' #MemberSelection
     | '!' expression #UnaryOp
     | expression op=('*' | '/') expression #BinaryOp
@@ -59,7 +98,7 @@ expression
     | expression op='<' expression #BinaryOp
     | expression op='&&' expression #BinaryOp
     | 'new' 'int' '[' expression ']' #NewArray
-    | 'new' ID '(' ')' #NewObject
+    | 'new' value=ID '(' ')' #NewObject
     | value=INT #IntValue
     | value=('true' | 'false') #BooleanValue
     | value=ID #Identifier

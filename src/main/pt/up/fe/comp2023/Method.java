@@ -10,8 +10,9 @@ public class Method {
     private Type returnType;
     private String name;
     private List<Symbol>  fields;
-
-    public Method() {}
+    private String scope;
+    private List<String> modifiers;
+    private List<Variable> variables;
 
     public Type getReturnType() {
         return returnType;
@@ -39,5 +40,21 @@ public class Method {
 
     public void addField(Symbol field) {
         this.fields.add(field);
+    }
+
+    public String getScope() {
+        return scope;
+    }
+
+    public void setScope(String scope) {
+        this.scope = scope;
+    }
+
+    public List<String> getModifiers() {
+        return modifiers;
+    }
+
+    public void setModifiers(List<String> modifiers) {
+        this.modifiers = modifiers;
     }
 }
