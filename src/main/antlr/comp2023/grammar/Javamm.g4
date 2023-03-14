@@ -4,6 +4,41 @@ grammar Javamm;
     package pt.up.fe.comp2023;
 }
 
+IMPORT : 'import';
+SEMICOLON : ';';
+DOT : '.';
+CLASS : 'class';
+EXTENDS : 'extends';
+CURLY_LEFT : '{';
+CURLY_RIGHT : '}';
+BRACKET_LEFT : '(';
+BRACKET_RIGHT : ')';
+SQUARE_LEFT : '[';
+SQUARE_RIGHT : ']';
+PUBLIC : 'public';
+STATIC : 'static';
+MAIN : 'main';
+COLON : ',';
+RETURN : 'return';
+BOOLEAN : 'boolean';
+INTEGER : 'int';
+VOID : 'void';
+IF : 'if';
+ELSE : 'else';
+WHILE : 'while';
+LENGTH : 'length';
+NEGATE : '!';
+EQUALS : '=';
+TIMES : '*';
+DIVIDE : '/';
+PLUS : '+';
+MINUS : '-';
+LESS_THAN : '<';
+AND : '&&';
+NEW : 'new';
+BOOL : ('true' | 'false');
+THIS : 'this';
+
 INT : [0-9]+ ;
 ID : [a-zA-Z][a-zA-Z_$0-9]* ;
 
@@ -16,7 +51,7 @@ program
     ;
 
 importDeclaration
-    : 'import' importName ('.'importName)*';' #Import
+    : IMPORT importName (DOT importName)* SEMICOLON #Import
     ;
 
 importName
@@ -24,83 +59,57 @@ importName
     ;
 
 classDeclaration
-    : 'class' className ('extends' extendName)? '{' (varDeclaration)* (methodDeclaration)* '}' #Class
-    ;
-
-className
-    : value=ID
-    ;
-
-extendName
-    : value=ID
+    : CLASS className=ID (EXTENDS extendName=ID)? CURLY_LEFT (varDeclaration)* (methodDeclaration)* CURLY_RIGHT #Class
     ;
 
 varDeclaration
-    : type value=ID ';'
+    : type value=ID SEMICOLON
     ;
 
 methodDeclaration
-    : scope (mod)? type methodName '(' ( methodParam ( ',' methodParam )* )? ')' '{' (varDeclaration)* (statement)* (returnStatement)? '}' #GenericMethod
-    | scope (mod)? type 'main' '(' methodParam ')' '{' (varDeclaration)* (statement)* '}' #MainMethod //TODO: Enforce type String later
+    : (PUBLIC)? STATIC type methodName=MAIN BRACKET_LEFT methodParam BRACKET_RIGHT CURLY_LEFT (varDeclaration)* (statement)* CURLY_RIGHT #MainMethod
+    | (PUBLIC)? type methodName=ID BRACKET_LEFT ( methodParam ( COLON methodParam )* )? BRACKET_RIGHT CURLY_LEFT (varDeclaration)* (statement)* returnStatement CURLY_RIGHT #GenericMethod
     ;
 
 methodParam
-    : type methodParamName
+    : type name=ID
     ;
 
 returnStatement
-    : 'return' expression ';'
+    : RETURN expression SEMICOLON
     ;
 
-methodName
-    : value=ID
-    ;
-
-methodParamName
-    : value=ID
-    ;
-
-scope
-    : 'public'
-    | 'private'
-    ;
-
-mod
-    : 'static'
-    ;
-
-type returns [Boolean isArray]
-    : 'int' '[' ']'{$isArray=true}
-    | 'boolean'
-    | 'int'
-    | 'void'
+type
+    : value=BOOLEAN
+    | value=INTEGER
+    | value=VOID
     | value=ID
-    | value=ID '[' ']'{$isArray=true}
+    | array=INTEGER SQUARE_LEFT SQUARE_RIGHT
     ;
 
 statement
-    : '{' (statement)* '}' #Brackets
-    | 'if' '(' expression ')' statement 'else' statement #IfElse
-    | 'while' '(' expression ')' statement #While
-    | expression ';' #RegularStatement
-    | type+ '=' expression ';' #DeclarationStatement
-    | value=ID '['expression']' '=' expression ';' #ArrayStatement
+    : CURLY_LEFT (statement)* CURLY_RIGHT #Brackets
+    | IF BRACKET_LEFT expression BRACKET_RIGHT statement ELSE statement #IfElse
+    | WHILE BRACKET_LEFT expression BRACKET_RIGHT statement #While
+    | expression SEMICOLON #RegularStatement
+    | type EQUALS expression SEMICOLON #DeclarationStatement
+    | value=ID SQUARE_LEFT expression SQUARE_RIGHT EQUALS expression SEMICOLON #ArrayStatement
     ;
 
 expression
-    : '(' expression ')' #Parenthesis
-    | expression '[' expression ']' #ArraySubscript
-    | expression '.' value=ID '(' ( expression ( ',' expression )* )? ')' #MemberSelection
-    | expression '.' 'length' #MemberSelection
-    | '!' expression #UnaryOp
-    | expression op=('*' | '/') expression #BinaryOp
-    | expression op=('+' | '-') expression #BinaryOp
-    | expression op='<' expression #BinaryOp
-    | expression op='&&' expression #BinaryOp
-    | 'new' 'int' '[' expression ']' #NewArray
-    | 'new' value=ID '(' ')' #NewObject
+    : BRACKET_LEFT expression BRACKET_RIGHT #Parenthesis
+    | expression SQUARE_LEFT expression SQUARE_RIGHT #ArraySubscript
+    | expression DOT value=ID BRACKET_LEFT ( expression ( COLON expression )* )? BRACKET_RIGHT #MemberSelection
+    | expression DOT LENGTH #MemberSelection
+    | NEGATE expression #UnaryOp
+    | expression op=(TIMES | DIVIDE) expression #BinaryOp
+    | expression op=(PLUS | MINUS) expression #BinaryOp
+    | expression op=LESS_THAN expression #BinaryOp
+    | expression op=AND expression #BinaryOp
+    | NEW INTEGER SQUARE_LEFT expression SQUARE_RIGHT #NewArray
+    | NEW value=ID BRACKET_LEFT BRACKET_RIGHT #NewObject
     | value=INT #IntValue
-    | value=('true' | 'false') #BooleanValue
+    | value=BOOL #BooleanValue
     | value=ID #Identifier
-    | 'this' #This
+    | THIS #This
     ;

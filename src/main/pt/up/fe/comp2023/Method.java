@@ -9,10 +9,14 @@ public class Method {
 
     private Type returnType;
     private String name;
-    private List<Symbol>  fields;
+    private List<Symbol> parameters;
     private String scope;
     private List<String> modifiers;
-    private List<Variable> variables;
+    private List<Symbol> variables;
+
+    public static String toString(Method object, Object o) {
+        return object.name;
+    }
 
     public Type getReturnType() {
         return returnType;
@@ -30,16 +34,16 @@ public class Method {
         this.name = name;
     }
 
-    public List<Symbol> getFields() {
-        return fields;
+    public List<Symbol> getParameters() {
+        return parameters;
     }
 
-    public void setFields(List<Symbol> fields) {
-        this.fields = fields;
+    public void setParameters(List<Symbol> parameters) {
+        this.parameters = parameters;
     }
 
     public void addField(Symbol field) {
-        this.fields.add(field);
+        this.parameters.add(field);
     }
 
     public String getScope() {
@@ -56,5 +60,13 @@ public class Method {
 
     public void setModifiers(List<String> modifiers) {
         this.modifiers = modifiers;
+    }
+
+    public List<Symbol> getVariables() {
+        return this.variables;
+    }
+
+    public void addVariable(Symbol variable) {
+        this.variables.add(variable);
     }
 }
