@@ -19,15 +19,13 @@ public class SimpleSymbolTable implements SymbolTable {
     public SimpleSymbolTable(JmmNode root) {
         this.root = root;
         SymbolTableVisitor visitor = new SymbolTableVisitor();
-
-        System.out.println(root);
         visitor.visit(root);
+
         this.imports = visitor.imports;
         this.methods = new MethodMap(visitor.methods);
         this.className = visitor.className;
         this.superClassName = visitor.classExtends;
         this.localVariables = visitor.localVariables;
-//         this.fields = populateFields(root);
 
     }
 

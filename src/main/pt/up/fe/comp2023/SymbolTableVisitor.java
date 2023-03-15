@@ -6,7 +6,6 @@ import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,10 +13,10 @@ public class SymbolTableVisitor extends AJmmVisitor<Object, Boolean> {
 
 
     public List<Method> methods = new ArrayList<Method>();
-    public List<String> imports;
-    public String className;
-    public String classExtends;
-    public List<Symbol> localVariables;
+    public List<String> imports = new ArrayList<String>();
+    public String className = "";
+    public String classExtends = "";
+    public List<Symbol> localVariables = new ArrayList<Symbol>();
 
     @Override
     protected void buildVisitor() {
@@ -27,7 +26,6 @@ public class SymbolTableVisitor extends AJmmVisitor<Object, Boolean> {
         addVisit("ImportDeclaration", this::dealWithImport);
         addVisit("Program", this::dealNext);
         addVisit("ClassName", this::dealNext);
-        addVisit("ExtendName", this::dealNext);
         addVisit("ClassDeclaration", this::dealNext);
         addVisit("Type", this::dealNext);
         addVisit("MethodParam", this::dealNext);
@@ -81,7 +79,7 @@ public class SymbolTableVisitor extends AJmmVisitor<Object, Boolean> {
     }
 
     private Boolean dealWithImport(JmmNode jmmNode, Object dummy) {
-        String importStr = jmmNode.getChildren().stream().map(node -> node.get("name"))
+        String importStr = jmmNode.getChildren().stream().map(node -> node.get("value"))
                 .collect(Collectors.joining("."));
         this.imports.add(importStr);
         return true;
