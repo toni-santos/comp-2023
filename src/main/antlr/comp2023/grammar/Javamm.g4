@@ -67,8 +67,8 @@ varDeclaration
     ;
 
 methodDeclaration
-    : (PUBLIC)? STATIC type methodName=MAIN BRACKET_LEFT methodParam BRACKET_RIGHT CURLY_LEFT (varDeclaration)* (statement)* CURLY_RIGHT #MainMethod
-    | (PUBLIC)? type methodName=ID BRACKET_LEFT ( methodParam ( COLON methodParam )* )? BRACKET_RIGHT CURLY_LEFT (varDeclaration)* (statement)* returnStatement CURLY_RIGHT #GenericMethod
+    : (PUBLIC)? type methodName=ID BRACKET_LEFT ( methodParam ( COLON methodParam )* )? BRACKET_RIGHT CURLY_LEFT (varDeclaration)* (statement)* returnStatement CURLY_RIGHT
+    | (PUBLIC)? STATIC type methodName=MAIN BRACKET_LEFT methodParam BRACKET_RIGHT CURLY_LEFT (varDeclaration)* (statement)* CURLY_RIGHT
     ;
 
 methodParam
@@ -80,11 +80,12 @@ returnStatement
     ;
 
 type
-    : value=BOOLEAN
+    : array=INTEGER SQUARE_LEFT SQUARE_RIGHT
     | value=INTEGER
+    | value=BOOLEAN
     | value=VOID
+    | array=ID SQUARE_LEFT SQUARE_RIGHT
     | value=ID
-    | array=INTEGER SQUARE_LEFT SQUARE_RIGHT
     ;
 
 statement
