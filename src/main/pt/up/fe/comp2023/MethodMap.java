@@ -19,26 +19,26 @@ public class MethodMap {
     }
 
     public Map<String, Method> getMethodsMap() {
-        return methods;
+        return this.methods;
     }
 
     public Integer length() {
-        return methodsLength;
+        return this.methodsLength;
     }
 
     public Type returnType(String s) {
-        return methods.get(s).getReturnType();
+        return this.methods.get(s).getReturnType();
     }
 
     public List<String> getMethodsName() {
-        return methods.keySet().stream().toList();
+        return this.methods.keySet().stream().toList();
     }
 
     public List<Symbol> getParameters(String s) {
-        return methods.get(s).getParameters();
+        return this.methods.get(s).getParameters();
     }
 
     public List<Symbol> getLocalVariables(String s) {
-        return methods.get(s).getVariables();
+        return this.methods.get(s).getVariables();
     }
 }

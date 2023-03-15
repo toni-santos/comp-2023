@@ -36,38 +36,34 @@ public class SimpleSymbolTable implements SymbolTable {
 
     @Override
     public String getClassName() {
-        return null;
+        return this.className;
     }
 
     @Override
     public String getSuper() {
-        return null;
+        return this.superClassName;
     }
 
     @Override
     public List<Symbol> getFields() {
-        return null;
+        return this.localVariables;
     }
 
     @Override
-    public List<String> getMethods() {
-        return methods.getMethodsName();
-    }
+    public List<String> getMethods() { return this.methods.getMethodsName(); }
 
     @Override
     public Type getReturnType(String s) {
-        return methods.returnType(s);
+        return this.methods.returnType(s);
     }
 
     @Override
     public List<Symbol> getParameters(String s) {
-        return methods.getParameters(s);
+        return this.methods.getParameters(s);
     }
 
     @Override
-    public List<Symbol> getLocalVariables(String s) {
-        return methods.getLocalVariables(s);
-    }
+    public List<Symbol> getLocalVariables(String s) { return null; }
 
     @Override
     public String print() {

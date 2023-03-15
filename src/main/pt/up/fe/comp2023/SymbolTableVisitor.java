@@ -21,12 +21,11 @@ public class SymbolTableVisitor extends AJmmVisitor<Object, Boolean> {
     @Override
     protected void buildVisitor() {
         setDefaultVisit(this::dealNext);
+        addVisit("ImportDeclaration", this::dealWithImport);
         addVisit("ClassDeclaration", this::dealWithClass);
         addVisit("MethodDeclaration", this::dealWithMethod);
-        addVisit("ImportDeclaration", this::dealWithImport);
         addVisit("Program", this::dealNext);
         addVisit("ClassName", this::dealNext);
-        addVisit("ClassDeclaration", this::dealNext);
         addVisit("Type", this::dealNext);
         addVisit("MethodParam", this::dealNext);
         addVisit("VarDeclaration", this::dealNext);
@@ -41,9 +40,11 @@ public class SymbolTableVisitor extends AJmmVisitor<Object, Boolean> {
         }
 
         for (JmmNode node: jmmNode.getChildren()) {
-            if (node.getKind().equals("varDeclaration")) {
+            if (node.getKind().equals("VarDeclaration")) {
                 Symbol var = processVarDeclaration(node);
                 localVariables.add(var);
+            } else {
+                visit(node);
             }
         }
 
@@ -52,24 +53,27 @@ public class SymbolTableVisitor extends AJmmVisitor<Object, Boolean> {
 
     private Boolean dealWithMethod(JmmNode jmmNode, Object dummy) {
         Method method = new Method();
-
         int iter = 0;
         method.setReturnType(getTypeNode(jmmNode.getJmmChild(iter)));
         iter++;
 
         String methodName = jmmNode.get("methodName");
         method.setName(methodName);
-        iter++;
 
         for (int i=iter; iter<jmmNode.getNumChildren(); iter++) {
             JmmNode node = jmmNode.getJmmChild(iter);
             switch (node.getKind()) {
-                case "methodParam" -> processMethodParam(node, method);
-                case "varDeclaration" -> {
+                case "MethodParam" -> {
+                    Symbol par = processMethodParam(node, method);
+                    method.addParameter(par);
+                }
+                case "VarDeclaration" -> {
                     Symbol var = processVarDeclaration(node);
                     method.addVariable(var);
                 }
-                default -> {}
+                default -> {
+                    visit(node);
+                }
             }
         }
 
@@ -93,17 +97,17 @@ public class SymbolTableVisitor extends AJmmVisitor<Object, Boolean> {
     }
 
     private Symbol processVarDeclaration(JmmNode node) {
-        Type varType = getTypeNode(node);
-        String varName = node.getJmmChild(1).get("text");
+        Type varType = getTypeNode(node.getJmmChild(0));
+        String varName = node.get("value");
 
         return new Symbol(varType, varName);
     }
 
-    private void processMethodParam(JmmNode methodParam, Method method) {
+    private Symbol processMethodParam(JmmNode methodParam, Method method) {
         Type paramType = getTypeNode(methodParam.getJmmChild(0));
         String paramName = methodParam.get("name");
 
-        method.addField(new Symbol(paramType, paramName));
+        return new Symbol(paramType, paramName);
     }
 
     private Type getTypeNode(JmmNode jmmNode) {
