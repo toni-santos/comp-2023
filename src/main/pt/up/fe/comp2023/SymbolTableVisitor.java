@@ -77,12 +77,6 @@ public class SymbolTableVisitor extends AJmmVisitor<Object, Boolean> {
             }
         }
 
-        for (Method oldMethod : this.methods) {
-            if (method.getParameters() == oldMethod.getParameters() && oldMethod.getName().equals(method.getName())) {
-                return false;
-            }
-        }
-
         this.methods.add(method);
 
         return true;

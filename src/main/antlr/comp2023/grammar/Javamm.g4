@@ -48,7 +48,7 @@ THIS : 'this';
 
 
 INT : ([0]|[1-9][0-9]*) ;
-ID : [a-zA-Z][a-zA-Z_$0-9]* ;
+ID : [a-zA-Z$_][a-zA-Z_$0-9]* ;
 
 WS : [ \t\n\r\f]+ -> skip ;
 
@@ -108,8 +108,8 @@ statement
 expression
     : BRACKET_LEFT expression BRACKET_RIGHT #Parenthesis
     | expression SQUARE_LEFT expression SQUARE_RIGHT #ArraySubscript
-    | expression DOT value=ID BRACKET_LEFT ( expression ( COLON expression )* )? BRACKET_RIGHT #MemberSelection
-    | expression DOT LENGTH #MemberSelection
+    | expression DOT value=ID BRACKET_LEFT ( expression ( COLON expression )* )? BRACKET_RIGHT #MethodCall
+    | expression DOT LENGTH #Length
     | NEGATE expression #UnaryOp
     | expression op=(TIMES | DIVIDE) expression #BinaryOp
     | expression op=(PLUS | MINUS) expression #BinaryOp

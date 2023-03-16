@@ -63,7 +63,7 @@ public class SimpleSymbolTable implements SymbolTable {
     }
 
     @Override
-    public List<Symbol> getLocalVariables(String s) { return null; }
+    public List<Symbol> getLocalVariables(String s) { return this.methods.getLocalVariables(s); }
 
     @Override
     public String print() {
