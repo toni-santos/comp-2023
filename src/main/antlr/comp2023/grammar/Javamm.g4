@@ -10,6 +10,7 @@ COMMENT : '//';
 
 COMMENT_ALL : MULT_COMMENT_START .*? MULT_COMMENT_END -> skip;
 COMMENT_LINE : COMMENT .*? [\n]-> skip;
+
 IMPORT : 'import';
 SEMICOLON : ';';
 DOT : '.';
