@@ -4,6 +4,12 @@ grammar Javamm;
     package pt.up.fe.comp2023;
 }
 
+MULT_COMMENT_START : '/*';
+MULT_COMMENT_END : '*/';
+COMMENT : '//';
+
+COMMENT_ALL : MULT_COMMENT_START .*? MULT_COMMENT_END -> skip;
+COMMENT_LINE : COMMENT .*? [\n]-> skip;
 IMPORT : 'import';
 SEMICOLON : ';';
 DOT : '.';
@@ -39,12 +45,13 @@ NEW : 'new';
 BOOL : ('true' | 'false');
 THIS : 'this';
 
-INT : [0-9]+ ;
+
+INT : ([0]|[1-9][0-9]*) ;
 ID : [a-zA-Z][a-zA-Z_$0-9]* ;
 
 WS : [ \t\n\r\f]+ -> skip ;
-COMMENT_ALL : '/*' [.]* '*/' -> skip;
-COMMENT_LINE : '//' [.]* [\n]-> skip;
+
+ANYCHAR : .;
 
 program
     : (importDeclaration)* classDeclaration EOF
