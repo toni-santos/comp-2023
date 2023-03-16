@@ -9,7 +9,7 @@ MULT_COMMENT_END : '*/';
 COMMENT : '//';
 
 COMMENT_ALL : MULT_COMMENT_START .*? MULT_COMMENT_END -> skip;
-COMMENT_LINE : COMMENT .*? [\n]-> skip;
+COMMENT_LINE : COMMENT ~[\r\n]* -> skip;
 
 IMPORT : 'import';
 SEMICOLON : ';';
