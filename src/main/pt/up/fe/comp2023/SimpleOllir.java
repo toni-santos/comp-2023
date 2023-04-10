@@ -7,6 +7,11 @@ import pt.up.fe.comp.jmm.ollir.OllirResult;
 public class SimpleOllir implements JmmOptimization {
     @Override
     public OllirResult toOllir(JmmSemanticsResult jmmSemanticsResult) {
+
+        OllirGenerator ollirGenerator = new OllirGenerator(jmmSemanticsResult.getSymbolTable());
+
+
+
         return null;
     }
 }
