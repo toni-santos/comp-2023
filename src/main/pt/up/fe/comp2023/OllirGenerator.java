@@ -25,6 +25,10 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
         addVisit("ImportDeclaration", this::dealWithImport);
         addVisit("ClassDeclaration", this::dealWithClass);
         addVisit("VarDeclaration", this::dealWithVarDeclaration);
+        addVisit("MethodDeclaration", this::dealWithMethodDeclaration);
+    }
+
+    private String dealWithMethodDeclaration(JmmNode jmmNode, String s) {
     }
 
     private String dealNext(JmmNode jmmNode, String s) {
@@ -57,8 +61,15 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
             code.append(getIndent()).append(".field public").append(field.getName()).append(".").append(toOllirType(field.getType())).append(";\n");
         }
 
+        // Defalut constructor
+        code.append(getIndent()).append(".construct ").append(symbolTable.getClassName()).append("().V {\n");
+        addIndent();
+        code.append(getIndent()).append("invokespecial(this, \"<init>\").V;\n");
+        removeIndent();
+        code.append(getIndent()).append("}\n");
+
         // Class Methods
-        for (JmmNode child : jmmNode.getChildren()) {
+        for (JmmNode child : jmmNode.getChildren().subList(symbolTable.getFields().size(), jmmNode.getChildren().size())) {
             visit(child);
         }
 
