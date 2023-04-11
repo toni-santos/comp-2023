@@ -1,12 +1,12 @@
 package pt.up.fe.comp2023;
 
-import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class OllirGenerator extends AJmmVisitor<String, String> {
@@ -29,6 +29,38 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
     }
 
     private String dealWithMethodDeclaration(JmmNode jmmNode, String s) {
+        String methodName = jmmNode.get("methodName");
+
+        List<Symbol> methodParameters = symbolTable.getParameters(methodName);
+        String methodReturnType = toOllirType(symbolTable.getReturnType(methodName));
+        List<Symbol> localVariables = symbolTable.getLocalVariables(methodName);
+
+        if (methodName.equals("main")) {
+            code.append(getIndent()).append(".method public static ").append(methodName).append("(");
+        } else {
+            code.append(getIndent()).append(".method public ").append(methodName).append("(");
+        }
+
+        List<String> parametersString = methodParameters.stream().map((param) -> {
+            StringBuilder string = new StringBuilder();
+            return string.append(param.getName()).append(toOllirType(param.getType())).toString();
+        }).toList();
+
+        String stringMethods = parametersString.stream().collect(Collectors.joining(", "));
+
+        code.append(getIndent()).append(stringMethods).append(")").append(methodReturnType).append(" {\n\n");
+        incrementIndent();
+
+        List<String> variablesString = localVariables.stream().map((variable) -> {
+            StringBuilder string = new StringBuilder();
+            return string.append(variable.getName()).append(toOllirType(variable.getType())).toString();
+        }).toList();
+
+        for (int i = 0; i < localVariables.size(); i++) {
+            code.append(getIndent()).append(variablesString.get(i)).append(" :=").append(toOllirType(localVariables.get(i).getType())).append(" ");
+        }
+
+        return "";
     }
 
     private String dealNext(JmmNode jmmNode, String s) {
@@ -54,7 +86,7 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
         }
         
         code.append("{\n");
-        addIndent();
+        incrementIndent();
 
         // Class Fields
         for (Symbol field : symbolTable.getFields()) {
@@ -63,7 +95,7 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
 
         // Defalut constructor
         code.append(getIndent()).append(".construct ").append(symbolTable.getClassName()).append("().V {\n");
-        addIndent();
+        incrementIndent();
         code.append(getIndent()).append("invokespecial(this, \"<init>\").V;\n");
         removeIndent();
         code.append(getIndent()).append("}\n");
@@ -87,7 +119,7 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
         this.indent++;
     }
 
-    private void addIndent() {
+    private void incrementIndent() {
         this.indent--;
     }
 
@@ -97,7 +129,7 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
 
     private String toOllirType(Type type) {
         StringBuilder result = new StringBuilder();
-        if (type.isArray()) {
+        if (type.isArray() || type.getName().equals("String")) {
             result.append(".array");
         }
 
