@@ -26,11 +26,19 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
         addVisit("ClassDeclaration", this::dealWithClass);
         addVisit("MethodDeclaration", this::dealWithMethodDeclaration);
         addVisit("DeclarationStatement", this::dealWithDeclarationStatement);
+        addVisit("RegularStatement", this::dealWithRegularStatement);
         addVisit("ReturnStatement", this::dealWithReturnStatement);
         addVisit("IntValue", this::dealWithValueStatement);
         addVisit("Identifier", this::dealWithValueStatement);
         addVisit("NewObject", this::dealWithNewObject);
         addVisit("This", this::dealWithValueStatement);
+    }
+
+    private String dealWithRegularStatement(JmmNode jmmNode, String s) {
+        visit(jmmNode.getJmmChild(0));
+        code.append(";\n");
+
+        return "";
     }
 
     private String dealWithNewObject(JmmNode jmmNode, String s) {
