@@ -120,5 +120,5 @@ expression
     | value=INT #IntValue
     | value=BOOL #BooleanValue
     | value=ID #Identifier
-    | THIS #This
+    | value=THIS #This
     ;
