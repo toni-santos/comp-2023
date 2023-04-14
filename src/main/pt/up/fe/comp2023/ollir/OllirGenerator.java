@@ -41,6 +41,24 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         addVisit("This", this::dealWithThisExpression);
         addVisit("Parenthesis", this::dealNext);
         addVisit("BinaryOp", this::dealWithBinaryOpExpression);
+        addVisit("UnaryOp", this::dealWithUnaryOpExpression);
+    }
+
+    private String dealWithUnaryOpExpression(JmmNode jmmNode, OllirTemp temp) {
+        String child = visit(jmmNode.getJmmChild(0), new OllirTemp(".bool", true));
+
+        String string = "!.bool " + child;
+
+        if (temp.isTemp()) {
+            this.auxNum++;
+            String auxNumber = this.auxNum.toString();
+            String auxString = "aux" + auxNumber + ".bool";
+
+            code.append(getIndent()).append(auxString).append(" :=.bool ").append(string).append(";\n");
+            return auxString;
+        }
+
+        return string;
     }
 
     private String dealWithBinaryOpExpression(JmmNode jmmNode, OllirTemp temp) {
