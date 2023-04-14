@@ -6,11 +6,9 @@ import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
 
@@ -21,6 +19,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
     private HashMap<String, String> methodFieldsMap = new HashMap<String, String>();
     private HashMap<String, String> classFieldsMap = new HashMap<String, String>();
     private String methodReturn;
+    private Integer auxNum = 0;
 
     OllirGenerator(SymbolTable symbolTable) {
         this.symbolTable = symbolTable;
@@ -40,13 +39,54 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         addVisit("Identifier", this::dealWithIdentifierExpression);
         addVisit("NewObject", this::dealWithNewObject);
         addVisit("This", this::dealWithThisExpression);
+        addVisit("Parenthesis", this::dealNext);
+        addVisit("BinaryOp", this::dealWithBinaryOpExpression);
     }
 
-    private String dealWithThisExpression(JmmNode jmmNode, OllirTemp ollirTemp) {
+    private String dealWithBinaryOpExpression(JmmNode jmmNode, OllirTemp temp) {
+
+        String binOp = jmmNode.get("op");
+        String string, retType = null, childType = null;
+
+        switch (binOp) {
+            case "*", "/", "+", "-" -> {
+                retType = ".i32";
+                childType = ".i32";
+            }
+            case "<" -> {
+                retType = ".bool";
+                childType = ".i32";
+            }
+            case "&&" -> {
+                retType = ".bool";
+                childType = ".bool";
+            }
+            default -> {}
+        }
+
+        String left = visit(jmmNode.getJmmChild(0), new OllirTemp(childType, true));
+        String right = visit(jmmNode.getJmmChild(1), new OllirTemp(childType, true));
+
+        string = left + " " + binOp + retType + " " + right;
+
+        if (temp.isTemp()) {
+            this.auxNum++;
+            String auxNumber = this.auxNum.toString();
+            String auxString = "aux"+ auxNumber + retType;
+
+            code.append(getIndent()).append(auxString).append(" :=").append(retType).append(" ").append(string).append(";\n");
+            return auxString;
+        }
+
+        return string;
+    }
+
+
+    private String dealWithThisExpression(JmmNode jmmNode, OllirTemp temp) {
         return "this";
     }
 
-    private String dealWithIdentifierExpression(JmmNode jmmNode, OllirTemp ollirTemp) {
+    private String dealWithIdentifierExpression(JmmNode jmmNode, OllirTemp temp) {
         return variableToOllirString(jmmNode.get("value"));
     }
 
@@ -87,7 +127,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
     }
 
     private String dealWithReturnStatement(JmmNode jmmNode, OllirTemp temp) {
-        String child = visit(jmmNode.getJmmChild(0));
+        String child = visit(jmmNode.getJmmChild(0), new OllirTemp(this.methodReturn, true));
 
         // method return type
         String retType = this.methodReturn;
@@ -96,7 +136,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         if (isParam) {
             code.append(getIndent()).append("ret").append(retType).append(" ").append(this.methodParamsMap.get(child)).append(";");
         } else {
-            code.append(getIndent()).append("ret").append(retType).append(" ").append(child).append(retType).append(";");
+            code.append(getIndent()).append("ret").append(retType).append(" ").append(child).append(";");
         }
 
         return "";
@@ -179,6 +219,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         this.methodParamsMap.clear();
         this.methodFieldsMap.clear();
         this.methodReturn = "";
+        this.auxNum = 0;
 
         return "";
     }
