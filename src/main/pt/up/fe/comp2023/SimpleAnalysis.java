@@ -24,14 +24,13 @@ public class SimpleAnalysis implements JmmAnalysis {
         List<GenericSemanticAnalyser> semanticAnalysers = new ArrayList<GenericSemanticAnalyser>();
         List<Report> reports = new ArrayList<Report>();
 
-        semanticAnalysers.add(new ArrayAnalyser(symbolTable));
-        semanticAnalysers.add(new AssignmentAnalyser(symbolTable));
-        semanticAnalysers.add(new ConditionalAnalyser(symbolTable));
-        semanticAnalysers.add(new ExpressionAnalyser(symbolTable));
-        semanticAnalysers.add(new IdentifierDeclarationAnalyser(symbolTable));
-        semanticAnalysers.add(new MethodAnalyser(symbolTable));
-        semanticAnalysers.add(new OperationTypeAnalyser(symbolTable));
-        semanticAnalysers.add(new VariableAnalyser(symbolTable));
+        semanticAnalysers.add(new ArrayAnalyser(symbolTable, jmmParserResult));
+        semanticAnalysers.add(new AssignmentAnalyser(symbolTable, jmmParserResult));
+        semanticAnalysers.add(new ConditionalAnalyser(symbolTable, jmmParserResult));
+        semanticAnalysers.add(new ExpressionAnalyser(symbolTable, jmmParserResult));
+        semanticAnalysers.add(new IdentifierDeclarationAnalyser(symbolTable, jmmParserResult));
+        semanticAnalysers.add(new MethodAnalyser(symbolTable, jmmParserResult));
+        semanticAnalysers.add(new OperationTypeAnalyser(symbolTable, jmmParserResult));
 
         for (GenericSemanticAnalyser semanticAnalyser : semanticAnalysers) {
             List<Report> report = semanticAnalyser.getReports();
