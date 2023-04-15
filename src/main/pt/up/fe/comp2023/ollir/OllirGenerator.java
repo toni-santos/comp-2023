@@ -6,6 +6,7 @@ import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +43,45 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         addVisit("Parenthesis", this::dealNext);
         addVisit("BinaryOp", this::dealWithBinaryOpExpression);
         addVisit("UnaryOp", this::dealWithUnaryOpExpression);
+        addVisit("MethodCall", this::dealWithMethodCallExpression);
+    }
+
+    private String dealWithMethodCallExpression(JmmNode jmmNode, OllirTemp temp) {
+        System.out.println(jmmNode.getJmmChild(0));
+        String callerName = visit(jmmNode.getJmmChild(0), new OllirTemp());
+        String methodName = jmmNode.get("value");
+        String callerType, invokeMethod;
+        ArrayList<String> args = new ArrayList<String>();
+
+        if (callerName == null) {
+            callerType = ".V";
+        } else {
+            if (!callerName.equals("this")) {
+                callerType = callerName.split("\\.")[0];
+            } else {
+                callerType = "this";
+            }
+
+        }
+
+        if (callerType.equals(symbolTable.getClassName()) || callerType.equals("this")) {
+            invokeMethod = "invokestatic";
+        } else {
+            invokeMethod = "invokevirtual";
+        }
+
+        // get arguments
+        for (int i = 1; i < jmmNode.getNumChildren(); i++) {
+            String arg = visit(jmmNode.getJmmChild(i));
+            args.add(arg);
+        }
+
+        String argsString = ", " + String.join(", ", args);
+
+        String string = invokeMethod + "(" + callerName + ", " + "\"" + methodName + "\"" + argsString + ")"+ callerType + ";\n";
+        code.append(getIndent()).append(string);
+
+        return "";
     }
 
     private String dealWithUnaryOpExpression(JmmNode jmmNode, OllirTemp temp) {
@@ -137,7 +177,19 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
     }
 
     private String dealWithNewObject(JmmNode jmmNode, OllirTemp temp) {
-        return "new(" + jmmNode.get("value") + ")." + jmmNode.get("value");
+        String retType = "." + jmmNode.get("value");
+        String string = "new(" + jmmNode.get("value") + ")" + retType;
+
+        if (temp.isTemp()) {
+            this.auxNum++;
+            String auxNumber = this.auxNum.toString();
+            String auxString = "aux" + auxNumber + retType;
+            code.append(getIndent()).append(auxString).append(" :=").append(retType).append(" ").append(string).append(";\n");
+
+            return auxString;
+        }
+
+        return string;
     }
 
     private String dealWithIntValueExpression(JmmNode jmmNode, OllirTemp temp) {
@@ -250,7 +302,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
 
         code.append(symbolTable.getClassName());
 
-        if (symbolTable.getSuper() != null) {
+        if (symbolTable.getSuper() != null && !symbolTable.getSuper().equals("")) {
             code.append(" extends ").append(symbolTable.getSuper());
         }
         
