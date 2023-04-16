@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
 
@@ -54,10 +55,15 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         ArrayList<String> args = new ArrayList<String>();
 
         if (callerName == null) {
-            callerType = ".V";
+            code.append("ERROR: VARIABLE DEFINITION OVERLAPPING OR UNDEFINED");
+            return "";
         } else {
             if (!callerName.equals("this")) {
-                callerType = callerName.split("\\.")[0];
+                if (this.symbolTable.getImports().contains(callerName)) {
+                    callerType = ".V";
+                } else {
+                    callerType = callerName.split("\\.")[0];
+                }
             } else {
                 callerType = "this";
             }
@@ -79,9 +85,22 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         String argsString = ", " + String.join(", ", args);
 
         String string = invokeMethod + "(" + callerName + ", " + "\"" + methodName + "\"" + argsString + ")"+ callerType + ";\n";
-        code.append(getIndent()).append(string);
 
-        return "";
+        if (temp.isTemp()) {
+            if (callerType.equals(".V")) {
+                return string;
+            } else {
+                this.auxNum++;
+                String auxNumber = this.auxNum.toString();
+                String auxString = "aux" + auxNumber + ".bool";
+
+                code.append(getIndent()).append(auxString).append(" :=").append(callerType).append(" ").append(string).append(";\n");
+
+                return auxString;
+            }
+        }
+
+        return string;
     }
 
     private String dealWithUnaryOpExpression(JmmNode jmmNode, OllirTemp temp) {
@@ -170,8 +189,8 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
     }
 
     private String dealWithRegularStatement(JmmNode jmmNode, OllirTemp temp) {
-        String child = visit(jmmNode.getJmmChild(0));
-        code.append(child).append(";\n");
+        String child = visit(jmmNode.getJmmChild(0), new OllirTemp());
+        code.append(getIndent()).append(child);
 
         return "";
     }
@@ -204,9 +223,9 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         boolean isParam = this.methodParamsMap.containsKey(child);
 
         if (isParam) {
-            code.append(getIndent()).append("ret").append(retType).append(" ").append(this.methodParamsMap.get(child)).append(";");
+            code.append("\n").append(getIndent()).append("ret").append(retType).append(" ").append(this.methodParamsMap.get(child)).append(";");
         } else {
-            code.append(getIndent()).append("ret").append(retType).append(" ").append(child).append(";");
+            code.append("\n").append(getIndent()).append("ret").append(retType).append(" ").append(child).append(";");
         }
 
         return "";
@@ -353,8 +372,9 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         boolean isMethodParam = this.methodParamsMap.containsKey(variable);
         boolean isClassField = this.classFieldsMap.containsKey(variable);
         boolean isMethodField = this.methodFieldsMap.containsKey(variable);
+        boolean isImport = this.symbolTable.getImports().contains(variable);
 
-        if ((isMethodParam && isClassField) || (isClassField && isMethodField) || (isMethodParam && isMethodField)) {
+        if ((isMethodParam && isClassField) || (isClassField && isMethodField) || (isMethodParam && isMethodField) || (isImport && isClassField) || (isImport && isMethodParam) || (isImport && isMethodField)) {
             return null;
         }
 
@@ -362,8 +382,10 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
             return this.classFieldsMap.get(variable);
         } else if (isMethodParam) {
             return this.methodParamsMap.get(variable);
-        } else if (isMethodField){
+        } else if (isMethodField) {
             return this.methodFieldsMap.get(variable);
+        } else if (isImport) {
+            return this.symbolTable.getImports().stream().filter(importStr -> importStr.equals(variable)).collect(Collectors.joining());
         } else {
             return null;
         }
