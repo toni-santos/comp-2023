@@ -45,10 +45,17 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         addVisit("BinaryOp", this::dealWithBinaryOpExpression);
         addVisit("UnaryOp", this::dealWithUnaryOpExpression);
         addVisit("MethodCall", this::dealWithMethodCallExpression);
+        addVisit("Length", this::dealWithLengthExpression);
+    }
+
+    private String dealWithLengthExpression(JmmNode jmmNode, OllirTemp ollirTemp) {
+
+        String arrayName = visit(jmmNode.getJmmChild(0), new OllirTemp());
+
+        return "arraylength(" + arrayName + ").i32";
     }
 
     private String dealWithMethodCallExpression(JmmNode jmmNode, OllirTemp temp) {
-        System.out.println(jmmNode.getJmmChild(0));
         String callerName = visit(jmmNode.getJmmChild(0), new OllirTemp());
         String methodName = jmmNode.get("value");
         String callerType, invokeMethod;

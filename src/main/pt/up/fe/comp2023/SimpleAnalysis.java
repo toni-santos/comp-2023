@@ -33,9 +33,9 @@ public class SimpleAnalysis implements JmmAnalysis {
         semanticAnalysers.add(new OperationTypeAnalyser(symbolTable, jmmParserResult));
 
         for (GenericSemanticAnalyser semanticAnalyser : semanticAnalysers) {
-            List<Report> report = semanticAnalyser.getReports();
+            /*List<Report> report = semanticAnalyser.getReports();
             reports.addAll(report);
-        }
+        */}
 
         return new JmmSemanticsResult(jmmParserResult, symbolTable, reports);
     }
