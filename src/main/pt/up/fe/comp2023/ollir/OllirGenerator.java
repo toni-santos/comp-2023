@@ -41,14 +41,30 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         addVisit("Identifier", this::dealWithIdentifierExpression);
         addVisit("NewObject", this::dealWithNewObject);
         addVisit("This", this::dealWithThisExpression);
-        addVisit("Parenthesis", this::dealNext);
+        addVisit("Parenthesis", this::dealWithParenthesis);
         addVisit("BinaryOp", this::dealWithBinaryOpExpression);
         addVisit("UnaryOp", this::dealWithUnaryOpExpression);
         addVisit("MethodCall", this::dealWithMethodCallExpression);
         addVisit("Length", this::dealWithLengthExpression);
+        addVisit("ArraySubscript", this::dealWithArraySubscriptExpression);
     }
 
-    private String dealWithLengthExpression(JmmNode jmmNode, OllirTemp ollirTemp) {
+    private String dealWithParenthesis(JmmNode jmmNode, OllirTemp temp) {
+        return visit(jmmNode.getJmmChild(0), new OllirTemp(temp.getType(), true));
+    }
+
+    private String dealWithArraySubscriptExpression(JmmNode jmmNode, OllirTemp temp) {
+        String arrayName = visit(jmmNode.getJmmChild(0), new OllirTemp());
+        String arrayType = Arrays.stream(arrayName.split("\\.")).toList().get(0);
+        if (arrayType.equals("array")) {
+            arrayType = Arrays.stream(arrayName.split("\\.")).toList().get(1);
+        }
+        String arrayAccess = visit(jmmNode.getJmmChild(0), new OllirTemp(arrayType, true));
+
+        return arrayName + "[" + arrayAccess + "]." + arrayType;
+    }
+
+    private String dealWithLengthExpression(JmmNode jmmNode, OllirTemp temp) {
 
         String arrayName = visit(jmmNode.getJmmChild(0), new OllirTemp());
 
@@ -362,7 +378,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
 
     private String dealNext(JmmNode jmmNode, OllirTemp temp) {
         for (JmmNode child : jmmNode.getChildren()) {
-            visit(child);
+            visit(child, new OllirTemp());
         }
         return "";
     }
