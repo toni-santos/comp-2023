@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ExpressionVisitor extends AJmmVisitor<Object, Boolean> {
+public class ExpressionVisitor extends AJmmVisitor<Object, Type> {
 
     List<Report> reports = new ArrayList<>();
     SimpleSymbolTable symbolTable;
@@ -32,9 +32,10 @@ public class ExpressionVisitor extends AJmmVisitor<Object, Boolean> {
         setDefaultVisit(this::dealNext);
 
         addVisit("This", this::dealWithThisExpression);
+        addVisit("Parenthesis", this::dealWithParenthesis);
     }
 
-    private Boolean dealWithThisExpression(JmmNode jmmNode, Object dummy) {
+    private Type dealWithThisExpression(JmmNode jmmNode, Object dummy) {
         JmmNode parentNode = jmmNode.getJmmParent();
         Integer line = Integer.valueOf(jmmNode.get("line"));
         Integer col = Integer.valueOf(jmmNode.get("col"));
@@ -43,20 +44,30 @@ public class ExpressionVisitor extends AJmmVisitor<Object, Boolean> {
         }
         if (parentNode.getKind().equals("methodDeclaration")) {
             if (parentNode.get("methodName").equals("main")) {
-                reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col, "'this' keyword cannot be used in static method"));
+                reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col, "THIS keyword cannot be used in static method"));
             }
         }
-        return true;
+        return new Type("", false);
+    }
+
+    private Type dealWithParenthesis(JmmNode jmmNode, Object dummy){
+        Type type = new Type("", false);
+        JmmNode expr = jmmNode.getJmmChild(1);
+        while (expr.getKind().equals("Parenthesis")){
+            expr = expr.getJmmChild(1);
+        }
+        type = this.visit(expr, dummy);
+        return type;
     }
 
 
 
 
-    private Boolean dealNext(JmmNode jmmNode, Object dummy) {
+    private Type dealNext(JmmNode jmmNode, Object dummy) {
         for (JmmNode child : jmmNode.getChildren()) {
             visit(child);
         }
-        return true;
+        return new Type("", false);
     }
 
     public List<Report> getReports() {

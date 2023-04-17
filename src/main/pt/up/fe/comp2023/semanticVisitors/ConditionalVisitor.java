@@ -31,11 +31,65 @@ public class ConditionalVisitor extends AJmmVisitor<Object, Boolean> {
 
         setDefaultVisit(this::dealNext);
 
-        addVisit("IfElse", this::dealWithConditions);
-        addVisit("While", this::dealWithConditions);
+        addVisit("IfElse", this::dealWithIfElse);
+        addVisit("While", this::dealWithWhile);
     }
 
-    private Boolean dealWithConditions(JmmNode jmmNode, Object dummy) {
+    private Boolean dealWithIfElse(JmmNode jmmNode, Object dummy) {
+
+        Type type = new Type("", false);
+
+        switch(jmmNode.getJmmChild(2).getKind()) {
+            case "Parenthesis":
+                ExpressionVisitor expressionVisitor = new ExpressionVisitor(symbolTable);
+                type = expressionVisitor.visit(jmmNode.getJmmChild(2), 0);
+                break;
+            case "BinaryOp":
+                // visit and get type
+                break;
+            case "UnaryOp":
+                // visit and get type
+                break;
+            case "MethodCall":
+                // visit and get type
+                break;
+            case "BooleanValue":
+                return true;
+        }
+        int line = Integer.valueOf(jmmNode.getJmmChild(2).get("line"));
+        int col = Integer.valueOf(jmmNode.getJmmChild(2).get("col"));
+        if (!type.getName().equals("boolean")) {
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col, "If Statement: condition must be a boolean"));
+        }
+        return true;
+    }
+
+    private Boolean dealWithWhile(JmmNode jmmNode, Object dummy) {
+
+        Type type = new Type("", false);
+
+        switch(jmmNode.getJmmChild(2).getKind()) {
+            case "Parenthesis":
+                ExpressionVisitor expressionVisitor = new ExpressionVisitor(symbolTable);
+                type = expressionVisitor.visit(jmmNode.getJmmChild(2), 0);
+                break;
+            case "BinaryOp":
+                // visit and get type
+                break;
+            case "UnaryOp":
+                // visit and get type
+                break;
+            case "MethodCall":
+                // visit and get type
+                break;
+            case "BooleanValue":
+                return true;
+        }
+        int line = Integer.valueOf(jmmNode.getJmmChild(2).get("line"));
+        int col = Integer.valueOf(jmmNode.getJmmChild(2).get("col"));
+        if (!type.getName().equals("boolean")) {
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col, "While Statement: condition must be a boolean"));
+        }
 
         return true;
     }

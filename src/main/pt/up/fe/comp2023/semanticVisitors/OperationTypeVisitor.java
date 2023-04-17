@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class OperationTypeVisitor extends AJmmVisitor<Object, Boolean> {
+public class OperationTypeVisitor extends AJmmVisitor<Object, Type> {
 
     List<Report> reports = new ArrayList<>();
     SimpleSymbolTable symbolTable;
@@ -35,24 +35,47 @@ public class OperationTypeVisitor extends AJmmVisitor<Object, Boolean> {
         addVisit("UnaryOp", this::dealWithThisUnaryOp);
     }
 
-    private Boolean dealWithThisBinOp(JmmNode jmmNode, Object dummy) {
+    private Type dealWithThisBinOp(JmmNode jmmNode, Object dummy) {
 
-        return true;
+        return new Type("", false);
     }
 
-    private Boolean dealWithThisUnaryOp(JmmNode jmmNode, Object dummy) {
+    private Type dealWithThisUnaryOp(JmmNode jmmNode, Object dummy) {
+        Type type = new Type("", false);
 
-        return true;
+        switch(jmmNode.getJmmChild(1).getKind()) {
+            case "Parenthesis":
+                ExpressionVisitor expressionVisitor = new ExpressionVisitor(symbolTable);
+                type = expressionVisitor.visit(jmmNode.getJmmChild(1), 0);
+                break;
+            case "BinaryOp":
+                // visit and get type
+                break;
+            case "UnaryOp":
+                type = this.visit(jmmNode.getJmmChild(1), 0);
+                break;
+            case "MethodCall":
+                // visit and get type
+                break;
+            case "BooleanValue":
+                return new Type("boolean", false);
+        }
+        int line = Integer.valueOf(jmmNode.getJmmChild(1).get("line"));
+        int col = Integer.valueOf(jmmNode.getJmmChild(1).get("col"));
+        if (!type.getName().equals("boolean")) {
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col, "This operation is only applicable to boolean values"));
+        }
+        return new Type("", false);
     }
 
 
 
 
-    private Boolean dealNext(JmmNode jmmNode, Object dummy) {
+    private Type dealNext(JmmNode jmmNode, Object dummy) {
         for (JmmNode child : jmmNode.getChildren()) {
             visit(child);
         }
-        return true;
+        return new Type("", false);
     }
 
     public List<Report> getReports() {
