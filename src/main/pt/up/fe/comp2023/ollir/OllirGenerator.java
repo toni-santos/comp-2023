@@ -277,7 +277,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
             String type = getTypeFromString(variableString);
             String child = visit(jmmNode.getJmmChild(1), new OllirTemp(type, true));
 
-            code.append(getIndent()).append("putfield(this, ").append(variableString).append(child).append(";\n");
+            code.append(getIndent()).append("putfield(this, ").append(variableString).append(child).append(").").append(type).append(";\n");
         } else {
             String type = getTypeFromString(variableString);
             String child = visit(jmmNode.getJmmChild(1), new OllirTemp());
@@ -314,7 +314,8 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
 
         // Method Local Variables
         for (Symbol variable : localVariables) {
-            code.append(getIndent()).append(".field public ").append(variable.getName()).append(toOllirType(variable.getType())).append(";\n");
+            String type = toOllirType(variable.getType());
+            code.append(getIndent()).append(variable.getName()).append(type).append(" :=").append(type).append(" ").append(getDefaultValueFromType(type)).append(";\n");
             methodFieldsMap.put(variable.getName(), variable.getName() + toOllirType(variable.getType()));
         }
         code.append("\n");
@@ -333,6 +334,20 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         this.methodReturn = "";
         this.auxNum = 0;
 
+        return "";
+    }
+
+    private String getDefaultValueFromType(String type) {
+        switch (type) {
+            case ".bool" -> {
+                return "1.bool";
+            }
+            case ".i32" -> {
+                return "0.i32";
+            }
+            default -> {
+            }
+        }
         return "";
     }
 
