@@ -22,6 +22,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
     private HashMap<String, String> classFieldsMap = new HashMap<String, String>();
     private String methodReturn;
     private Integer auxNum = 0;
+    private List<String> primitiveTypes = Arrays.asList(".bool", ".i32");
 
     OllirGenerator(SymbolTable symbolTable) {
         this.symbolTable = symbolTable;
@@ -227,7 +228,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
             String auxNumber = this.auxNum.toString();
             String auxString = "aux" + auxNumber + retType;
             code.append(getIndent()).append(auxString).append(" :=").append(retType).append(" ").append(string).append(";\n");
-
+            code.append(getIndent()).append("invokespecial(").append(string).append(",\"<init>\").V;\n");
             return auxString;
         }
 
@@ -272,15 +273,14 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         }
 
         boolean isClassField = this.classFieldsMap.containsKey(variableName);
+        String type = getTypeFromString(variableString);
 
         if (isClassField) {
-            String type = getTypeFromString(variableString);
             String child = visit(jmmNode.getJmmChild(1), new OllirTemp(type, true));
 
             code.append(getIndent()).append("putfield(this, ").append(variableString).append(child).append(").").append(type).append(";\n");
         } else {
-            String type = getTypeFromString(variableString);
-            String child = visit(jmmNode.getJmmChild(1), new OllirTemp());
+            String child = visit(jmmNode.getJmmChild(1), new OllirTemp(type, false));
 
             code.append(getIndent()).append(variableString).append(" :=.").append(type).append(" ").append(child).append(";\n");
         }
@@ -316,6 +316,11 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         for (Symbol variable : localVariables) {
             String type = toOllirType(variable.getType());
             code.append(getIndent()).append(variable.getName()).append(type).append(" :=").append(type).append(" ").append(getDefaultValueFromType(type)).append(";\n");
+
+            if (!primitiveTypes.contains(type)) {
+                code.append(getIndent()).append("invokespecial(").append(type.substring(1)).append(",\"<init>\").V;\n");
+            }
+
             methodFieldsMap.put(variable.getName(), variable.getName() + toOllirType(variable.getType()));
         }
         code.append("\n");
@@ -346,9 +351,9 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
                 return "0.i32";
             }
             default -> {
+                return "new(" + type.substring(1) + ")" + type;
             }
         }
-        return "";
     }
 
     private String dealWithClass(JmmNode jmmNode, OllirTemp temp) {
