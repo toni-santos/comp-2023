@@ -52,7 +52,7 @@ public class ExpressionVisitor extends AJmmVisitor<Object, Type> {
 
     private Type dealWithParenthesis(JmmNode jmmNode, Object dummy){
         Type type = new Type("", false);
-        JmmNode expr = jmmNode.getJmmChild(1);
+        JmmNode expr = jmmNode.getJmmChild(0);
         while (expr.getKind().equals("Parenthesis")){
             expr = expr.getJmmChild(1);
         }
