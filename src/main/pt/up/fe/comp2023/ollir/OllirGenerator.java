@@ -324,7 +324,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
             code.append(getIndent()).append(variable.getName()).append(type).append(" :=").append(type).append(" ").append(getDefaultValueFromType(type)).append(";\n");
 
             if (!primitiveTypes.contains(type)) {
-                code.append(getIndent()).append("invokespecial(").append(type.substring(1)).append(",\"<init>\").V;\n");
+                code.append(getIndent()).append("invokespecial(").append(variable.getName()).append(type).append(",\"<init>\").V;\n");
             }
 
             methodFieldsMap.put(variable.getName(), variable.getName() + toOllirType(variable.getType()));
