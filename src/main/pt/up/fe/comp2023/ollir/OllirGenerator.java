@@ -94,9 +94,9 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         }
 
         if (callerType.equals(symbolTable.getClassName()) || callerType.equals("this")) {
-            invokeMethod = "invokestatic";
-        } else {
             invokeMethod = "invokevirtual";
+        } else {
+            invokeMethod = "invokestatic";
         }
 
         // get arguments
