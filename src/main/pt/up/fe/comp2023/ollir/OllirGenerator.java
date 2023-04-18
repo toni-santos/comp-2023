@@ -114,7 +114,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
             argsString = "";
         }
 
-        String string = invokeMethod + "(" + callerName + ", " + "\"" + methodName + "\"" + argsString + ")"+ returnType + ";\n";
+        String string = invokeMethod + "(" + callerName + ", " + "\"" + methodName + "\"" + argsString + ")"+ returnType;
 
         if (temp.isTemp()) {
             if (callerType.equals(".V")) {
@@ -124,7 +124,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
                 String auxNumber = this.auxNum.toString();
                 String auxString = "aux" + auxNumber + ".bool";
 
-                code.append(getIndent()).append(auxString).append(" :=").append(callerType).append(" ").append(string).append(";\n");
+                code.append(getIndent()).append(auxString).append(" :=").append(callerType).append(" ").append(string);
 
                 return auxString;
             }
