@@ -75,7 +75,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
     private String dealWithMethodCallExpression(JmmNode jmmNode, OllirTemp temp) {
         String callerName = visit(jmmNode.getJmmChild(0), new OllirTemp());
         String methodName = jmmNode.get("value");
-        String callerType, invokeMethod;
+        String callerType, invokeMethod, returnType, argsString;
         ArrayList<String> args = new ArrayList<String>();
 
         if (callerName == null) {
@@ -86,7 +86,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
                 if (this.symbolTable.getImports().contains(callerName)) {
                     callerType = ".V";
                 } else {
-                    callerType = callerName.split("\\.")[0];
+                    callerType = callerName.split("\\.")[1];
                 }
             } else {
                 callerType = "this";
@@ -96,8 +96,10 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
 
         if (callerType.equals(symbolTable.getClassName()) || callerType.equals("this")) {
             invokeMethod = "invokevirtual";
+            returnType = toOllirType(symbolTable.getReturnType(methodName));
         } else {
             invokeMethod = "invokestatic";
+            returnType = ".V";
         }
 
         // get arguments
@@ -106,9 +108,13 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
             args.add(arg);
         }
 
-        String argsString = ", " + String.join(", ", args);
+        if (args.size() > 0) {
+             argsString = ", " + String.join(", ", args);
+        } else {
+            argsString = "";
+        }
 
-        String string = invokeMethod + "(" + callerName + ", " + "\"" + methodName + "\"" + argsString + ")"+ callerType + ";\n";
+        String string = invokeMethod + "(" + callerName + ", " + "\"" + methodName + "\"" + argsString + ")"+ returnType + ";\n";
 
         if (temp.isTemp()) {
             if (callerType.equals(".V")) {
