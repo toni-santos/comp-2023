@@ -8,12 +8,11 @@ import java.util.HashMap;
 public class JasminGenerator {
     public StringBuilder jasminCode;
     public static ClassUnit ollirClass;
-    public HashMap<ElementType, String> simpleTypes;
+    public static final HashMap<ElementType, String> simpleTypes = generateSimpleTypes();
 
     public JasminGenerator(ClassUnit ollirClass) {
         this.jasminCode = new StringBuilder();
         JasminGenerator.ollirClass = ollirClass;
-        this.simpleTypes = this.getSimpleTypes();
     }
 
     public String generate() {
@@ -21,33 +20,41 @@ public class JasminGenerator {
         String superName = ollirClass.getSuperClass() != null ? ollirClass.getSuperClass() : "java/lang/Object";
         jasminCode.append(".class public ").append(className).append("\n");
         jasminCode.append(".super ").append(superName).append("\n\n");
-        for (int i = 0; i < ollirClass.getNumFields(); i++) {
-            String jasminField = new JasminField(ollirClass, simpleTypes).getField(i);
-            jasminCode.append(jasminField).append("\n");
-        }
-
-        jasminCode.append(".method public <init>()V\n").append("\taload_0\n").append("\tinvokespecial ")
-                .append(superName).append("/<init>()V\n")
-                .append("\treturn\n")
-                .append(".end method").append("\n".repeat(5));
-
-        for (int i = 0; i < ollirClass.getNumMethods(); i++) {
-            String jasminMethod = new JasminMethod(ollirClass, simpleTypes).getMethod(i);
-            if (!ollirClass.getMethod(i).isConstructMethod()) jasminCode.append(jasminMethod).append("\n");
-        }
+        jasminCode.append(generateFields());
+        jasminCode.append(generateDefaultConstructor(superName));
+        jasminCode.append(generateMethods());
         return jasminCode.toString();
     }
 
-    public HashMap<ElementType, String> getSimpleTypes() {
-        simpleTypes = new HashMap<ElementType, String>();
-        simpleTypes.put(ElementType.INT32, "I");
-        simpleTypes.put(ElementType.BOOLEAN, "Z");
-        simpleTypes.put(ElementType.STRING, "Ljava/lang/String;");
-        simpleTypes.put(ElementType.VOID, "V");
-        return simpleTypes;
+    private static String generateFields() {
+        StringBuilder fields = new StringBuilder();
+        for (int i = 0; i < ollirClass.getNumFields(); i++) {
+            String jasminField = new JasminField(ollirClass).getField(i);
+            fields.append(jasminField).append("\n");
+        }
+        return fields.toString();
     }
 
-    public static String getClassName() {
-        return ollirClass.getClassName();
+    private static String generateMethods() {
+        StringBuilder methods = new StringBuilder();
+        for (int i = 0; i < ollirClass.getNumMethods(); i++) {
+            String jasminMethod = new JasminMethod(ollirClass).getMethod(i);
+            if (!ollirClass.getMethod(i).isConstructMethod()) methods.append(jasminMethod).append("\n");
+        }
+        return methods.toString();
     }
+
+    private static String generateDefaultConstructor(String superName) {
+        return ".method public <init>()V\n\taload_0\n\tinvokespecial " +
+                superName + "/<init>()V\n\treturn\n.end method" + "\n".repeat(5);
+    }
+    private static HashMap<ElementType, String> generateSimpleTypes() {
+        HashMap<ElementType, String> types = new HashMap<>();
+        types.put(ElementType.INT32, "I");
+        types.put(ElementType.BOOLEAN, "Z");
+        types.put(ElementType.STRING, "Ljava/lang/String;");
+        types.put(ElementType.VOID, "V");
+        return types;
+    }
+
 }

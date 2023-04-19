@@ -14,12 +14,10 @@ public class JasminMethod {
     public boolean isConstruct;
     public StringBuilder methodCode;
     public ClassUnit ollirClass;
-    public HashMap<ElementType, String> simpleTypes;
 
-    public JasminMethod(ClassUnit ollirClass, HashMap<ElementType, String> types) {
+    public JasminMethod(ClassUnit ollirClass) {
         this.methodCode = new StringBuilder();
         this.ollirClass = ollirClass;
-        this.simpleTypes = types;
     }
 
     public String getMethod(int i) {
@@ -29,12 +27,14 @@ public class JasminMethod {
         this.isConstruct = method.isConstructMethod();
         this.access = getAccessModifier(method);
 
-        methodCode.append(".method ").append(getMethodScope(method)).append(getMethodBody(method));
+        methodCode.append(".method ")
+                .append(getMethodScope(method))
+                .append(getMethodBody(method));
         methodCode.append(".end method\n");
         return methodCode.toString();
     }
 
-    public String getMethodScope(Method method) {
+    private String getMethodScope(Method method) {
         StringBuilder scope = new StringBuilder(access).append(" ");
         if (isStatic) {
             scope.append("static ");
@@ -49,36 +49,46 @@ public class JasminMethod {
             scope.append(method.getMethodName()).append("(");
         }
         for (Element parameter: method.getParams()){
-            scope.append(JasminUtils.getType(parameter.getType(), simpleTypes));
+            scope.append(JasminUtils.getType(parameter.getType()));
         }
-        scope.append(")").append(JasminUtils.getType(method.getReturnType(), simpleTypes)).append("\n");
+        scope.append(")").append(JasminUtils.getType(method.getReturnType())).append("\n");
         return scope.toString();
     }
 
-    public String getMethodBody(Method method) {
+    private String getMethodBody(Method method) {
         StringBuilder body = new StringBuilder();
         ArrayList<Instruction> instructions = method.getInstructions();
-        Instruction instruction;
-        HashMap<String, Descriptor> variables = method.getVarTable();
-        JasminInstruction jasminInstruction = new JasminInstruction(ollirClass, variables, simpleTypes);
-        body.append("\t.limit stack 99\n\t.limit locals 99\n");
+        body.append(getStackLimit());
         for (instructionIndex = 0; instructionIndex < instructions.size(); instructionIndex++) {
-            instruction = instructions.get(instructionIndex);
-            for (String label : method.getLabels(instruction)) {
-                body.append(label).append(":\n");
-            }
-            body.append(jasminInstruction.getInstruction(instruction)).append("\n");
-            if (instruction.getInstType() == InstructionType.CALL) {
-                ElementType returnType = ((CallInstruction) instruction).getReturnType().getTypeOfElement();
-                if (returnType != ElementType.VOID || ((CallInstruction) instruction).getInvocationType() == CallType.invokespecial) {
-                    body.append("\tpop\n");
-                }
-            }
+            Instruction instruction = instructions.get(instructionIndex);
+            System.out.println("instruction.getInstType() = " + instruction.getInstType());
+            body.append(getInstructionWithLabels(instruction));
         }
         return body.toString();
     }
 
-    public String getAccessModifier(Method method) {
+    private String getStackLimit() {
+        return "\t.limit stack 99\n\t.limit locals 99\n";
+    }
+
+    private String getInstructionWithLabels(Instruction instruction) {
+        StringBuilder inst = new StringBuilder();
+        HashMap<String, Descriptor> variables = method.getVarTable();
+        JasminInstruction jasminInstruction = new JasminInstruction(ollirClass, variables);
+        for (String label : method.getLabels(instruction)) {
+            inst.append(label).append(":\n");
+        }
+        inst.append(jasminInstruction.getInstruction(instruction)).append("\n");
+        if (instruction.getInstType() == InstructionType.CALL) {
+            ElementType returnType = ((CallInstruction) instruction).getReturnType().getTypeOfElement();
+            if (returnType != ElementType.VOID || ((CallInstruction) instruction).getInvocationType() == CallType.invokespecial) {
+                inst.append("\tpop\n");
+            }
+        }
+        return inst.toString();
+    }
+
+    private String getAccessModifier(Method method) {
         if (method.getMethodAccessModifier() == AccessModifiers.DEFAULT) {
             return this.isConstruct ? "public" : "private";
         }

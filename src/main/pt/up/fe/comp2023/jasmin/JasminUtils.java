@@ -5,30 +5,44 @@ import org.specs.comp.ollir.*;
 import java.util.HashMap;
 
 public class JasminUtils {
-    public static String getType(Type type, HashMap<ElementType, String> simpleTypes) {
+    public static boolean isBetween(int integer, int lhs, int rhs) {
+        return integer >= lhs && integer <= rhs;
+    }
+
+    public static String getClassName() {
+        return JasminGenerator.ollirClass.getClassName();
+    }
+    public static String getClassWithImports(String className) {
+        if (className.equals("this")) { return JasminUtils.getClassName(); }
+        for (String importName : JasminGenerator.ollirClass.getImports()) {
+            if (importName.endsWith(className)) { return importName; }
+        }
+        return className;
+    }
+    public static String getType(Type type) {
         ElementType elementType = type.getTypeOfElement();
         switch (elementType) {
             case ARRAYREF -> {
-                return getArrayType((ArrayType) type, simpleTypes);
+                return getArrayType((ArrayType) type);
             }
             case OBJECTREF, CLASS -> {
                 return ((ClassType) type).getName();
             }
             case THIS -> {
-                return JasminGenerator.getClassName();
+                return getClassName();
             }
             default -> {
-                return simpleTypes.get(elementType);
+                return JasminGenerator.simpleTypes.get(elementType);
             }
         }
     }
 
-    public static String getArrayType(ArrayType type, HashMap<ElementType, String> simpleTypes) {
-        return "[".repeat(type.getNumDimensions()) + getType(type.getElementType(), simpleTypes);
+    public static String getArrayType(ArrayType type) {
+        return "[".repeat(type.getNumDimensions()) + getType(type.getElementType());
     }
 
-    public static boolean isBetween(int integer, int lhs, int rhs) {
-        return integer >= lhs && integer <= rhs;
+    public static ElementType getElementType(Element element) {
+        return element.getType().getTypeOfElement();
     }
 
     public static String getOp(Operation op) {

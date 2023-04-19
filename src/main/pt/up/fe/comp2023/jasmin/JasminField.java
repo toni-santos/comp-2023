@@ -6,17 +6,18 @@ import java.util.HashMap;
 
 public class JasminField {
     public Field field;
+    public String name;
     public String access;
+    public Type type;
     public boolean isStatic;
     public boolean isFinal;
     public boolean isInitialized;
     public StringBuilder fieldCode;
     public ClassUnit ollirClass;
-    public HashMap<ElementType, String> simpleTypes;
-    public JasminField(ClassUnit ollirClass, HashMap<ElementType, String> types) {
+
+    public JasminField(ClassUnit ollirClass) {
         this.fieldCode = new StringBuilder();
         this.ollirClass = ollirClass;
-        this.simpleTypes = types;
     }
 
     public String getField(int i) {
@@ -24,26 +25,19 @@ public class JasminField {
         this.isStatic = field.isStaticField();
         this.isFinal = field.isFinalField();
         this.isInitialized = field.isInitialized();
+        this.name = field.getFieldName();
         this.access = getAccessModifier(field);
+        this.type = field.getFieldType();
 
-        fieldCode.append(".field ");
-        if (access.equals("default")) fieldCode.append("private ");
-        else { fieldCode.append(access).append(" "); }
-        if (isStatic) {
-            fieldCode.append("static ");
-        }
-        if (isFinal) {
-            fieldCode.append("final ");
-        }
-        fieldCode.append(field.getFieldName()).append(" ").append(JasminUtils.getType(field.getFieldType(), simpleTypes));
-        if (isInitialized) {
-            fieldCode.append(" = ").append(field.getInitialValue());
-        }
+        fieldCode.append(".field ").append(access.equals("default") ? "private " : access + " ");
+        fieldCode.append(isStatic ? "static " : "").append(isFinal ? "final " : "");
+        fieldCode.append(name).append(" ").append(JasminUtils.getType(type));
+        fieldCode.append(isInitialized ? " = " + field.getInitialValue() : "");
 
         return fieldCode.toString();
     }
 
-    public static String getAccessModifier(Field field) {
+    private static String getAccessModifier(Field field) {
         return field.getFieldAccessModifier().name().toLowerCase();
     }
 }
