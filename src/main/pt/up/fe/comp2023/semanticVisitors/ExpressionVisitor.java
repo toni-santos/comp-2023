@@ -58,7 +58,7 @@ public class ExpressionVisitor extends AJmmVisitor<Object, Type> {
         switch(expr.getKind()) {
             case "IntValue":
             case "BooleanValue":
-            case "Id":
+            case "Identifier":
             case "NewObject":
                 VariableVisitor variableVisitor = new VariableVisitor(symbolTable);
                 return new Type(variableVisitor.visit(expr, 0).getName(), variableVisitor.visit(expr, 0).isArray());

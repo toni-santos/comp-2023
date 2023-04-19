@@ -48,7 +48,7 @@ public class OperationTypeVisitor extends AJmmVisitor<Object, Type> {
                 break;
             case "IntValue":
             case "BooleanValue":
-            case "Id":
+            case "Identifier":
                 VariableVisitor variableVisitor = new VariableVisitor(symbolTable);
                 lhs = variableVisitor.visit(jmmNode.getJmmChild(0), 0);
                 break;
@@ -71,18 +71,18 @@ public class OperationTypeVisitor extends AJmmVisitor<Object, Type> {
                 break;
             case "IntValue":
             case "BooleanValue":
-            case "Id":
+            case "Identifier":
                 VariableVisitor variableVisitor = new VariableVisitor(symbolTable);
-                rhs = variableVisitor.visit(jmmNode.getJmmChild(0), 0);
+                rhs = variableVisitor.visit(jmmNode.getJmmChild(1), 0);
                 break;
             case "LengthMethod":
             case "MethodCall":{
                 MethodVisitor methodVisitor = new MethodVisitor(symbolTable);
-                rhs = methodVisitor.visit(jmmNode.getJmmChild(0), 0);
+                rhs = methodVisitor.visit(jmmNode.getJmmChild(1), 0);
                 break;
             }
             default:{
-                rhs = this.visit(jmmNode.getJmmChild(0));
+                rhs = this.visit(jmmNode.getJmmChild(1));
                 break;
             }
         }
@@ -121,10 +121,10 @@ public class OperationTypeVisitor extends AJmmVisitor<Object, Type> {
                 case "*":
                     return new Type("int", false);
                 default:
-                    return new Type(lhs.getName(), lhs.isArray());
+                    return lhs;
             }
         }
-        return new Type(lhs.getName(), lhs.isArray());
+        return lhs;
     }
 
     private Type dealWithThisUnaryOp(JmmNode jmmNode, Object dummy) {
@@ -145,7 +145,10 @@ public class OperationTypeVisitor extends AJmmVisitor<Object, Type> {
                 // visit and get type
                 break;
             case "BooleanValue":
-                return new Type("boolean", false);
+            case "Identifier":
+                VariableVisitor variableVisitor = new VariableVisitor(symbolTable);
+                type = variableVisitor.visit(jmmNode.getJmmChild(0), 0);
+                break;
             default:
                 type = this.visit(jmmNode.getJmmChild(0));
                 break;
