@@ -104,7 +104,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
 
         // get arguments
         for (int i = 1; i < jmmNode.getNumChildren(); i++) {
-            String arg = visit(jmmNode.getJmmChild(i));
+            String arg = visit(jmmNode.getJmmChild(i), new OllirTemp(returnType, true));
             args.add(arg);
         }
 
