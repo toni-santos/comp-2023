@@ -49,19 +49,19 @@ public class JasminInstruction {
                 BinaryOpInstruction expression = (BinaryOpInstruction) rhs;
                 boolean lhsIsLiteral = expression.getLeftOperand().isLiteral();
                 boolean rhsIsLiteral = expression.getRightOperand().isLiteral();
-                String leftOperandName = ((Operand) expression.getLeftOperand()).getName();
-                String rightOperandName = ((Operand) expression.getRightOperand()).getName();
                 OperationType opType = expression.getOperation().getOpType();
                 if (opType == OperationType.ADD || opType == OperationType.SUB) {
                     String operator = opType == OperationType.ADD ? "" : "-";
                     int register = variables.get(operandName).getVirtualReg();
                     if (!lhsIsLiteral && rhsIsLiteral) {
+                        String leftOperandName = ((Operand) expression.getLeftOperand()).getName();
                         if (leftOperandName.equals(lhs.getName())) {
                             String literal = operator + ((LiteralElement) expression.getRightOperand()).getLiteral();
                             return "iinc " + register + " " + literal;
                         }
                     }
                     else if (lhsIsLiteral && !rhsIsLiteral) {
+                        String rightOperandName = ((Operand) expression.getRightOperand()).getName();
                         if (rightOperandName.equals(lhs.getName())) {
                             String literal = operator + ((LiteralElement) expression.getLeftOperand()).getLiteral();
                             return "iinc " + register + " " + literal;
@@ -107,7 +107,7 @@ public class JasminInstruction {
             invoke.append(getLoad(argument));
         }
         argumentTypes.append(")");
-        invokeCode = invokeType.toString() + " " + className + "/" + methodName + argumentTypes.toString() + returnType
+        invokeCode = invokeType.toString() + " " + className + "/" + methodName + argumentTypes + returnType
                 + "\n";
         invoke.append(invokeCode);
         return invoke.toString();
