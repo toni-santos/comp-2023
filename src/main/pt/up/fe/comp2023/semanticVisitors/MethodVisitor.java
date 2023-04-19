@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MethodVisitor extends AJmmVisitor<Object, Boolean> {
+public class MethodVisitor extends AJmmVisitor<Object, Type> {
 
     List<Report> reports = new ArrayList<>();
     SimpleSymbolTable symbolTable;
@@ -35,26 +35,25 @@ public class MethodVisitor extends AJmmVisitor<Object, Boolean> {
         addVisit("Length", this::dealWithLength);
     }
 
-    private Boolean dealWithMethod(JmmNode jmmNode, Object dummy) {
+    private Type dealWithMethod(JmmNode jmmNode, Object dummy) {
 
-        return true;
+        return new Type("", false);
     }
 
-    private Boolean dealWithLength(JmmNode jmmNode, Object dummy) {
+    private Type dealWithLength(JmmNode jmmNode, Object dummy) {
 
-        return true;
+        return new Type("int", false);
     }
 
 
 
 
-    private Boolean dealNext(JmmNode jmmNode, Object dummy) {
+    private Type dealNext(JmmNode jmmNode, Object dummy) {
         for (JmmNode child : jmmNode.getChildren()) {
             visit(child);
         }
-        return true;
+        return new Type("", false);
     }
-
     public List<Report> getReports() {
         return this.reports;
     }

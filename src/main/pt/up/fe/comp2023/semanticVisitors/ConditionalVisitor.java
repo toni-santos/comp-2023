@@ -39,27 +39,31 @@ public class ConditionalVisitor extends AJmmVisitor<Object, Boolean> {
 
         Type type = new Type("", false);
 
-        switch(jmmNode.getJmmChild(2).getKind()) {
+        switch(jmmNode.getJmmChild(0).getKind()) {
             case "Parenthesis":
                 ExpressionVisitor expressionVisitor = new ExpressionVisitor(symbolTable);
-                type = expressionVisitor.visit(jmmNode.getJmmChild(2), 0);
+                type = expressionVisitor.visit(jmmNode.getJmmChild(0), 0);
                 break;
             case "BinaryOp":
                 // visit and get type
                 break;
             case "UnaryOp":
-                // visit and get type
+                OperationTypeVisitor opVisitor = new OperationTypeVisitor(symbolTable);
+                type = opVisitor.visit(jmmNode.getJmmChild(0), 0);
                 break;
             case "MethodCall":
                 // visit and get type
                 break;
             case "BooleanValue":
                 return true;
+            default:
+                this.visit(jmmNode.getJmmChild(0));
+                break;
         }
-        int line = Integer.valueOf(jmmNode.getJmmChild(2).get("line"));
-        int col = Integer.valueOf(jmmNode.getJmmChild(2).get("col"));
+        //int line = Integer.valueOf(jmmNode.getJmmChild(0).get("line"));
+        //int col = Integer.valueOf(jmmNode.getJmmChild(0).get("col"));
         if (!type.getName().equals("boolean")) {
-            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col, "If Statement: condition must be a boolean"));
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, 0, 0, "If Statement: condition must be a boolean"));
         }
         return true;
     }
@@ -68,16 +72,17 @@ public class ConditionalVisitor extends AJmmVisitor<Object, Boolean> {
 
         Type type = new Type("", false);
 
-        switch(jmmNode.getJmmChild(2).getKind()) {
+        switch(jmmNode.getJmmChild(0).getKind()) {
             case "Parenthesis":
                 ExpressionVisitor expressionVisitor = new ExpressionVisitor(symbolTable);
-                type = expressionVisitor.visit(jmmNode.getJmmChild(2), 0);
+                type = expressionVisitor.visit(jmmNode.getJmmChild(0), 0);
                 break;
             case "BinaryOp":
                 // visit and get type
                 break;
             case "UnaryOp":
-                // visit and get type
+                OperationTypeVisitor opVisitor = new OperationTypeVisitor(symbolTable);
+                type = opVisitor.visit(jmmNode.getJmmChild(0), 0);
                 break;
             case "MethodCall":
                 // visit and get type
@@ -85,10 +90,10 @@ public class ConditionalVisitor extends AJmmVisitor<Object, Boolean> {
             case "BooleanValue":
                 return true;
         }
-        int line = Integer.valueOf(jmmNode.getJmmChild(2).get("line"));
-        int col = Integer.valueOf(jmmNode.getJmmChild(2).get("col"));
+        //int line = Integer.valueOf(jmmNode.getJmmChild(0).get("line"));
+        //int col = Integer.valueOf(jmmNode.getJmmChild(0).get("col"));
         if (!type.getName().equals("boolean")) {
-            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col, "While Statement: condition must be a boolean"));
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, 0, 0, "While Statement: condition must be a boolean"));
         }
 
         return true;

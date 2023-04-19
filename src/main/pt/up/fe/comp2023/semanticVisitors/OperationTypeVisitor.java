@@ -1,5 +1,6 @@
 package pt.up.fe.comp2023.semanticVisitors;
 
+import jas.Var;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
@@ -36,36 +37,125 @@ public class OperationTypeVisitor extends AJmmVisitor<Object, Type> {
     }
 
     private Type dealWithThisBinOp(JmmNode jmmNode, Object dummy) {
+        String op = jmmNode.get("op");
+        Type lhs = new Type("", false);
+        Type rhs = new Type("", false);
 
-        return new Type("", false);
+        switch(jmmNode.getJmmChild(0).getKind()) {
+            case "Parenthesis":
+                ExpressionVisitor expressionVisitor = new ExpressionVisitor(symbolTable);
+                lhs = expressionVisitor.visit(jmmNode.getJmmChild(0), 0);
+                break;
+            case "IntValue":
+            case "BooleanValue":
+            case "Id":
+                VariableVisitor variableVisitor = new VariableVisitor(symbolTable);
+                lhs = variableVisitor.visit(jmmNode.getJmmChild(0), 0);
+                break;
+            case "LengthMethod":
+            case "MethodCall":{
+                MethodVisitor methodVisitor = new MethodVisitor(symbolTable);
+                lhs = methodVisitor.visit(jmmNode.getJmmChild(0), 0);
+                break;
+            }
+            default:{
+                lhs = this.visit(jmmNode.getJmmChild(0));
+                break;
+            }
+        }
+
+        switch(jmmNode.getJmmChild(1).getKind()) {
+            case "Parenthesis":
+                ExpressionVisitor expressionVisitor = new ExpressionVisitor(symbolTable);
+                rhs = expressionVisitor.visit(jmmNode.getJmmChild(1), 0);
+                break;
+            case "IntValue":
+            case "BooleanValue":
+            case "Id":
+                VariableVisitor variableVisitor = new VariableVisitor(symbolTable);
+                rhs = variableVisitor.visit(jmmNode.getJmmChild(0), 0);
+                break;
+            case "LengthMethod":
+            case "MethodCall":{
+                MethodVisitor methodVisitor = new MethodVisitor(symbolTable);
+                rhs = methodVisitor.visit(jmmNode.getJmmChild(0), 0);
+                break;
+            }
+            default:{
+                rhs = this.visit(jmmNode.getJmmChild(0));
+                break;
+            }
+        }
+        /*
+        int lineLeft = Integer.valueOf(jmmNode.getJmmChild(0).get("line"));
+        int colLeft = Integer.valueOf(jmmNode.getJmmChild(0).get("col"));
+        int lineRight = Integer.valueOf(jmmNode.getJmmChild(1).get("line"));
+        int colRight = Integer.valueOf(jmmNode.getJmmChild(1).get("col"));
+         */
+
+        int lineLeft = 0;
+        int colLeft = 0;
+        int lineRight = 0;
+        int colRight = 0;
+
+        if(!lhs.getName().equals(rhs.getName())){
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, lineRight, colRight, "Error in operation " + op + " : operands have different types"));
+        }
+        else if( ( lhs.isArray() || rhs.isArray() ) && ( op.equals("+") || op.equals("-") || op.equals("*") || op.equals("/") || op.equals("<") ) ) {
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, lineLeft, colLeft, "Error in operation " + op + " : array cannot be used in this operation"));
+        }
+        else if(!lhs.getName().equals("int") && ( op.equals("+") || op.equals("-") || op.equals("*") || op.equals("/") || op.equals("<") ) ) {
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, lineLeft, colLeft, "Error in operation " + op + " : operands have invalid types for this operation. " + op + " expects operands of type integer"));
+        }
+        else if(!lhs.getName().equals("boolean") && ( op.equals("&&") || op.equals("!") )) {
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, lineLeft, lineLeft, "Error in operation "+ op + " : operands have invalid types for this operation. " + op + " expects operands of type boolean"));
+        }
+        else {
+            switch(op) {
+                case "<":
+                case "&&":
+                    return new Type("boolean", false);
+                case "+":
+                case "-":
+                case "/":
+                case "*":
+                    return new Type("int", false);
+                default:
+                    return new Type(lhs.getName(), lhs.isArray());
+            }
+        }
+        return new Type(lhs.getName(), lhs.isArray());
     }
 
     private Type dealWithThisUnaryOp(JmmNode jmmNode, Object dummy) {
         Type type = new Type("", false);
 
-        switch(jmmNode.getJmmChild(1).getKind()) {
+        switch(jmmNode.getJmmChild(0).getKind()) {
             case "Parenthesis":
                 ExpressionVisitor expressionVisitor = new ExpressionVisitor(symbolTable);
-                type = expressionVisitor.visit(jmmNode.getJmmChild(1), 0);
+                type = expressionVisitor.visit(jmmNode.getJmmChild(0), 0);
                 break;
             case "BinaryOp":
                 // visit and get type
                 break;
             case "UnaryOp":
-                type = this.visit(jmmNode.getJmmChild(1), 0);
+                type = this.visit(jmmNode.getJmmChild(0), 0);
                 break;
             case "MethodCall":
                 // visit and get type
                 break;
             case "BooleanValue":
                 return new Type("boolean", false);
+            default:
+                type = this.visit(jmmNode.getJmmChild(0));
+                break;
         }
-        int line = Integer.valueOf(jmmNode.getJmmChild(1).get("line"));
-        int col = Integer.valueOf(jmmNode.getJmmChild(1).get("col"));
+        //int line = Integer.valueOf(jmmNode.getJmmChild(1).get("line"));
+        //int col = Integer.valueOf(jmmNode.getJmmChild(1).get("col"));
         if (!type.getName().equals("boolean")) {
-            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col, "This operation is only applicable to boolean values"));
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, 0, 0, "This operation is only applicable to boolean values"));
         }
-        return new Type("", false);
+        return new Type("boolean", false);
     }
 
 
