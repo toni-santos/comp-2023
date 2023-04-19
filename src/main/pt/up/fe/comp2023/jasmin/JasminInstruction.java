@@ -24,7 +24,6 @@ public class JasminInstruction {
             case ASSIGN -> { return "\t" + dealWithAssign((AssignInstruction) instruction); }
             case CALL -> { return "\t" + dealWithCall((CallInstruction) instruction); }
             case GOTO -> { return "\t" + dealWithGoto((GotoInstruction) instruction); }
-            case BRANCH -> { return "\t" + dealWithBranch((CondBranchInstruction) instruction); }
             case RETURN -> { return dealWithReturn((ReturnInstruction) instruction); }
             case PUTFIELD -> { return dealWithPutfield((PutFieldInstruction) instruction); }
             case GETFIELD -> { return "\t" + dealWithGetfield((GetFieldInstruction) instruction); }
@@ -134,10 +133,6 @@ public class JasminInstruction {
         return "goto " + instruction.getLabel();
     }
 
-    public String dealWithBranch(CondBranchInstruction instruction) {
-        return "branch";
-    }
-
     public String dealWithReturn(ReturnInstruction instruction) {
         if (!instruction.hasReturnValue()) return "return";
         StringBuilder _return = new StringBuilder();
@@ -187,7 +182,6 @@ public class JasminInstruction {
         binOp.append(getLoad(lhs)).append(getLoad(rhs)).append("\t").append(
                 JasminUtils.getOp(instruction.getOperation()));
         binOp.append("\n");
-        System.out.println("binOp.toString() = " + binOp.toString());
         return binOp.toString();
     }
 
