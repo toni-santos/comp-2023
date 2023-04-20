@@ -24,15 +24,20 @@ public class VariableVisitor extends AJmmVisitor<Object, Type>{
 
         setDefaultVisit(this::dealNext);
 
-        addVisit("IntValue", this::dealWithLiteral);
-        addVisit("BooleanValue", this::dealWithLiteral);
+        addVisit("IntValue", this::dealWithInt);
+        addVisit("BooleanValue", this::dealWithBoolean);
         addVisit("NewObject", this::dealWithNewObject);
         addVisit("Identifier", this::dealWithId);
     }
 
-    private Type dealWithLiteral(JmmNode jmmNode, Object dummy) {
+    private Type dealWithInt(JmmNode jmmNode, Object dummy) {
 
-        return new Type(jmmNode.get("value"), false);
+        return new Type("int", false);
+    }
+
+    private Type dealWithBoolean(JmmNode jmmNode, Object dummy) {
+
+        return new Type("boolean", false);
     }
 
     private Type dealWithNewObject(JmmNode jmmNode, Object dummy) {
@@ -42,7 +47,7 @@ public class VariableVisitor extends AJmmVisitor<Object, Type>{
 
     private Type dealWithId(JmmNode jmmNode, Object dummy) {
         IdentifierDeclarationVisitor idVisitor = new IdentifierDeclarationVisitor(symbolTable);
-        return new Type(idVisitor.visit(jmmNode, 0).getName(), idVisitor.visit(jmmNode, 0).isArray());
+        return idVisitor.visit(jmmNode, 0);
     }
 
 

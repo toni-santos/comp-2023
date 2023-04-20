@@ -53,15 +53,14 @@ public class OperationTypeVisitor extends AJmmVisitor<Object, Type> {
                 lhs = variableVisitor.visit(jmmNode.getJmmChild(0), 0);
                 break;
             case "LengthMethod":
-            case "MethodCall":{
+            case "MethodCall":
                 MethodVisitor methodVisitor = new MethodVisitor(symbolTable);
                 lhs = methodVisitor.visit(jmmNode.getJmmChild(0), 0);
                 break;
-            }
-            default:{
+            case "BinaryOp":
+            case "UnaryOp":
                 lhs = this.visit(jmmNode.getJmmChild(0));
                 break;
-            }
         }
 
         switch(jmmNode.getJmmChild(1).getKind()) {
@@ -76,15 +75,14 @@ public class OperationTypeVisitor extends AJmmVisitor<Object, Type> {
                 rhs = variableVisitor.visit(jmmNode.getJmmChild(1), 0);
                 break;
             case "LengthMethod":
-            case "MethodCall":{
+            case "MethodCall":
                 MethodVisitor methodVisitor = new MethodVisitor(symbolTable);
                 rhs = methodVisitor.visit(jmmNode.getJmmChild(1), 0);
                 break;
-            }
-            default:{
+            case "BinaryOp":
+            case "UnaryOp":
                 rhs = this.visit(jmmNode.getJmmChild(1));
                 break;
-            }
         }
         /*
         int lineLeft = Integer.valueOf(jmmNode.getJmmChild(0).get("line"));
@@ -107,7 +105,7 @@ public class OperationTypeVisitor extends AJmmVisitor<Object, Type> {
         else if(!lhs.getName().equals("int") && ( op.equals("+") || op.equals("-") || op.equals("*") || op.equals("/") || op.equals("<") ) ) {
             reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, lineLeft, colLeft, "Error in operation " + op + " : operands have invalid types for this operation. " + op + " expects operands of type integer"));
         }
-        else if(!lhs.getName().equals("boolean") && ( op.equals("&&") || op.equals("!") )) {
+        else if(!lhs.getName().equals("boolean") && ( op.equals("&&") )) {
             reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, lineLeft, lineLeft, "Error in operation "+ op + " : operands have invalid types for this operation. " + op + " expects operands of type boolean"));
         }
         else {
@@ -136,8 +134,6 @@ public class OperationTypeVisitor extends AJmmVisitor<Object, Type> {
                 type = expressionVisitor.visit(jmmNode.getJmmChild(0), 0);
                 break;
             case "BinaryOp":
-                // visit and get type
-                break;
             case "UnaryOp":
                 type = this.visit(jmmNode.getJmmChild(0), 0);
                 break;

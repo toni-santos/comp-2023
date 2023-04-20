@@ -45,8 +45,6 @@ public class ConditionalVisitor extends AJmmVisitor<Object, Boolean> {
                 type = expressionVisitor.visit(jmmNode.getJmmChild(0), 0);
                 break;
             case "BinaryOp":
-                // visit and get type
-                break;
             case "UnaryOp":
                 OperationTypeVisitor opVisitor = new OperationTypeVisitor(symbolTable);
                 type = opVisitor.visit(jmmNode.getJmmChild(0), 0);
@@ -81,8 +79,6 @@ public class ConditionalVisitor extends AJmmVisitor<Object, Boolean> {
                 type = expressionVisitor.visit(jmmNode.getJmmChild(0), 0);
                 break;
             case "BinaryOp":
-                // visit and get type
-                break;
             case "UnaryOp":
                 OperationTypeVisitor opVisitor = new OperationTypeVisitor(symbolTable);
                 type = opVisitor.visit(jmmNode.getJmmChild(0), 0);
