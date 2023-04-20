@@ -23,6 +23,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
     private String methodReturn;
     private Integer auxNum = 0;
     private List<String> primitiveTypes = Arrays.asList(".bool", ".i32");
+    private String methodName;
 
     OllirGenerator(SymbolTable symbolTable) {
         this.symbolTable = symbolTable;
@@ -249,6 +250,11 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
     }
 
     private String dealWithReturnStatement(JmmNode jmmNode, OllirTemp temp) {
+        if (methodName.equals("main")) {
+            code.append("\n").append(getIndent()).append("ret.V;");
+            return "";
+        }
+
         String child = visit(jmmNode.getJmmChild(0), new OllirTemp(this.methodReturn, true));
 
         // method return type
@@ -305,6 +311,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
 
     private String dealWithMethodDeclaration(JmmNode jmmNode, OllirTemp temp) {
         String methodName = jmmNode.get("methodName");
+        this.methodName = methodName;
 
         List<Symbol> methodParameters = symbolTable.getParameters(methodName);
         String methodReturnType = toOllirType(symbolTable.getReturnType(methodName));
@@ -353,6 +360,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         this.methodFieldsMap.clear();
         this.methodReturn = "";
         this.auxNum = 0;
+        this.methodName = "";
 
         return "";
     }
