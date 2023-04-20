@@ -236,16 +236,12 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         String retType = "." + value;
         String newString = "new(" + value + ")" + retType;
 
-        if (temp.isTemp()) {
-            this.auxNum++;
-            String auxNumber = this.auxNum.toString();
-            String auxString = "aux" + auxNumber + retType;
-            code.append(getIndent()).append(auxString).append(" :=").append(retType).append(" ").append(newString).append(";\n");
-            code.append(getIndent()).append("invokespecial(").append(auxString).append(",\"<init>\").V;\n");
-            return auxString;
-        }
-
-        return newString;
+        this.auxNum++;
+        String auxNumber = this.auxNum.toString();
+        String auxString = "aux" + auxNumber + retType;
+        code.append(getIndent()).append(auxString).append(" :=").append(retType).append(" ").append(newString).append(";\n");
+        code.append(getIndent()).append("invokespecial(").append(auxString).append(",\"<init>\").V;\n");
+        return auxString;
     }
 
     private String dealWithIntValueExpression(JmmNode jmmNode, OllirTemp temp) {
