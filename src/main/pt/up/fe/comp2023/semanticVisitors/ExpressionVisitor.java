@@ -57,21 +57,24 @@ public class ExpressionVisitor extends AJmmVisitor<Object, Type> {
             expr = expr.getJmmChild(0);
         }
         switch(expr.getKind()) {
+            case "ArraySubscript":
+                ArrayVisitor arrayVisitor = new ArrayVisitor(symbolTable);
+                return arrayVisitor.visit(expr, 0);
             case "IntValue":
             case "BooleanValue":
             case "Identifier":
             case "NewObject":
                 VariableVisitor variableVisitor = new VariableVisitor(symbolTable);
-                return new Type(variableVisitor.visit(expr, 0).getName(), variableVisitor.visit(expr, 0).isArray());
+                return variableVisitor.visit(expr, 0);
             case "LengthMethod":
             case "MethodCall":{
                 MethodVisitor methodVisitor = new MethodVisitor(symbolTable);
-                return new Type(methodVisitor.visit(expr, 0).getName(), methodVisitor.visit(expr, 0).isArray());
+                return methodVisitor.visit(expr, 0);
             }
             case "UnaryOp":
             case "BinaryOp":
                 OperationTypeVisitor opVisitor = new OperationTypeVisitor(symbolTable);
-                return new Type(opVisitor.visit(expr, 0).getName(), opVisitor.visit(expr, 0).isArray());
+                return opVisitor.visit(expr, 0);
         }
         Type type = this.visit(expr, dummy);
         return type;

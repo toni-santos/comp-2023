@@ -66,7 +66,7 @@ public class ArrayVisitor extends AJmmVisitor<Object, Type> {
                 break;
         }
 
-        if (!type1.isArray() && type1.getName().equals("int")) {
+        if (!type1.isArray()) {
             reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, 0, 0, "Array access on invalid type"));
         }
 
@@ -105,7 +105,7 @@ public class ArrayVisitor extends AJmmVisitor<Object, Type> {
         }
 
 
-        return new Type("int", true);
+        return new Type("int", false);
     }
 
 

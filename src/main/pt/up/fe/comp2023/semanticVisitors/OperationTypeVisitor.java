@@ -46,6 +46,10 @@ public class OperationTypeVisitor extends AJmmVisitor<Object, Type> {
                 ExpressionVisitor expressionVisitor = new ExpressionVisitor(symbolTable);
                 lhs = expressionVisitor.visit(jmmNode.getJmmChild(0), 0);
                 break;
+            case "ArraySubscript":
+                ArrayVisitor arrayVisitor = new ArrayVisitor(symbolTable);
+                lhs = arrayVisitor.visit(jmmNode.getJmmChild(0), 0);
+                break;
             case "IntValue":
             case "BooleanValue":
             case "Identifier":
@@ -67,6 +71,10 @@ public class OperationTypeVisitor extends AJmmVisitor<Object, Type> {
             case "Parenthesis":
                 ExpressionVisitor expressionVisitor = new ExpressionVisitor(symbolTable);
                 rhs = expressionVisitor.visit(jmmNode.getJmmChild(1), 0);
+                break;
+            case "ArraySubscript":
+                ArrayVisitor arrayVisitor = new ArrayVisitor(symbolTable);
+                rhs = arrayVisitor.visit(jmmNode.getJmmChild(1), 0);
                 break;
             case "IntValue":
             case "BooleanValue":
@@ -132,6 +140,10 @@ public class OperationTypeVisitor extends AJmmVisitor<Object, Type> {
             case "Parenthesis":
                 ExpressionVisitor expressionVisitor = new ExpressionVisitor(symbolTable);
                 type = expressionVisitor.visit(jmmNode.getJmmChild(0), 0);
+                break;
+            case "ArraySubscript":
+                ArrayVisitor arrayVisitor = new ArrayVisitor(symbolTable);
+                type = arrayVisitor.visit(jmmNode.getJmmChild(0), 0);
                 break;
             case "BinaryOp":
             case "UnaryOp":

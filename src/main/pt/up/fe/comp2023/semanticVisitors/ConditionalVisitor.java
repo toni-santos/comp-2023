@@ -44,6 +44,10 @@ public class ConditionalVisitor extends AJmmVisitor<Object, Boolean> {
                 ExpressionVisitor expressionVisitor = new ExpressionVisitor(symbolTable);
                 type = expressionVisitor.visit(jmmNode.getJmmChild(0), 0);
                 break;
+            case "ArraySubscript":
+                ArrayVisitor arrayVisitor = new ArrayVisitor(symbolTable);
+                type = arrayVisitor.visit(jmmNode.getJmmChild(0), 0);
+                break;
             case "BinaryOp":
             case "UnaryOp":
                 OperationTypeVisitor opVisitor = new OperationTypeVisitor(symbolTable);
@@ -77,6 +81,10 @@ public class ConditionalVisitor extends AJmmVisitor<Object, Boolean> {
             case "Parenthesis":
                 ExpressionVisitor expressionVisitor = new ExpressionVisitor(symbolTable);
                 type = expressionVisitor.visit(jmmNode.getJmmChild(0), 0);
+                break;
+            case "ArraySubscript":
+                ArrayVisitor arrayVisitor = new ArrayVisitor(symbolTable);
+                type = arrayVisitor.visit(jmmNode.getJmmChild(1), 0);
                 break;
             case "BinaryOp":
             case "UnaryOp":
