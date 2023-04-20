@@ -26,7 +26,7 @@ public class JasminUtils {
                 return getArrayType((ArrayType) type);
             }
             case OBJECTREF, CLASS -> {
-                return ((ClassType) type).getName();
+                return "L" + ((ClassType) type).getName();
             }
             case THIS -> {
                 return getClassName();

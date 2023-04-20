@@ -29,7 +29,7 @@ public class JasminField {
         this.access = getAccessModifier(field);
         this.type = field.getFieldType();
 
-        fieldCode.append(".field ").append(access.equals("default") ? "private " : access + " ");
+        fieldCode.append(".field ").append(access).append(" ");
         fieldCode.append(isStatic ? "static " : "").append(isFinal ? "final " : "");
         fieldCode.append(name).append(" ").append(JasminUtils.getType(type));
         fieldCode.append(isInitialized ? " = " + field.getInitialValue() : "");
@@ -38,6 +38,7 @@ public class JasminField {
     }
 
     private static String getAccessModifier(Field field) {
-        return field.getFieldAccessModifier().name().toLowerCase();
+        return field.getFieldAccessModifier() == AccessModifiers.DEFAULT ? "private" :
+                field.getFieldAccessModifier().name().toLowerCase();
     }
 }
