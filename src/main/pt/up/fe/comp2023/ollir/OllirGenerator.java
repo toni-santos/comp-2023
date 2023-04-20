@@ -121,7 +121,6 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
             if (callerType.equals(".V")) {
                 return string;
             } else {
-                this.auxNum++;
                 String auxNumber = this.auxNum.toString();
                 String auxType;
                 if (temp.getType().startsWith(".")) {
@@ -132,6 +131,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
                 String auxString = "aux" + auxNumber + returnType;
 
                 code.append(getIndent()).append(auxString).append(" :=").append(returnType).append(" ").append(string).append(";\n");
+                this.auxNum++;
 
                 return auxString;
             }
@@ -146,11 +146,12 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         String string = "!.bool " + child;
 
         if (temp.isTemp()) {
-            this.auxNum++;
             String auxNumber = this.auxNum.toString();
             String auxString = "aux" + auxNumber + ".bool";
 
             code.append(getIndent()).append(auxString).append(" :=.bool ").append(string).append(";\n");
+            this.auxNum++;
+
             return auxString;
         }
 
@@ -184,11 +185,12 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         string = left + " " + binOp + retType + " " + right;
 
         if (temp.isTemp()) {
-            this.auxNum++;
             String auxNumber = this.auxNum.toString();
             String auxString = "aux"+ auxNumber + retType;
 
             code.append(getIndent()).append(auxString).append(" :=").append(retType).append(" ").append(string).append(";\n");
+            this.auxNum++;
+
             return auxString;
         }
 
@@ -237,11 +239,12 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         String retType = "." + value;
         String newString = "new(" + value + ")" + retType;
 
-        this.auxNum++;
         String auxNumber = this.auxNum.toString();
         String auxString = "aux" + auxNumber + retType;
         code.append(getIndent()).append(auxString).append(" :=").append(retType).append(" ").append(newString).append(";\n");
         code.append(getIndent()).append("invokespecial(").append(auxString).append(",\"<init>\").V;\n");
+        this.auxNum++;
+
         return auxString;
     }
 
@@ -359,7 +362,6 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         this.methodParamsMap.clear();
         this.methodFieldsMap.clear();
         this.methodReturn = "";
-        this.auxNum = 0;
         this.methodName = "";
 
         return "";
@@ -430,7 +432,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         for (int i = 0; i < methodParameters.size(); i++) {
             Symbol param = methodParameters.get(i);
 
-            methodParamsMap.put(param.getName(), "$" + i + "." + param.getName() + toOllirType(param.getType()));
+            methodParamsMap.put(param.getName(), "$" + (i+1) + "." + param.getName() + toOllirType(param.getType()));
         }
     }
 
