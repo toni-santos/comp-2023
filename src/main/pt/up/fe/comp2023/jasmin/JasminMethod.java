@@ -7,7 +7,6 @@ import java.util.HashMap;
 
 public class JasminMethod {
     public Method method;
-    public int instructionIndex = 0;
     public String access;
     public boolean isStatic;
     public boolean isFinal;
@@ -59,9 +58,7 @@ public class JasminMethod {
         StringBuilder body = new StringBuilder();
         ArrayList<Instruction> instructions = method.getInstructions();
         body.append(getStackLimit());
-        for (instructionIndex = 0; instructionIndex < instructions.size(); instructionIndex++) {
-            Instruction instruction = instructions.get(instructionIndex);
-            System.out.println("instruction.getInstType() = " + instruction.getInstType());
+        for (Instruction instruction : instructions) {
             body.append(getInstructionWithLabels(instruction));
         }
         return body.toString();
