@@ -36,12 +36,34 @@ public class JasminInstruction {
         Operand lhs = (Operand) instruction.getDest();
         Instruction rhs = instruction.getRhs();
         String operandName = lhs.getName();
-        if (rhs.getInstType() == InstructionType.BINARYOPER) {
-            BinaryOpInstruction expression = (BinaryOpInstruction) rhs;
-            OperationType opType = expression.getOperation().getOpType();
-            if (opType == OperationType.ADD || opType == OperationType.SUB) {
-                String returnCode = dealWithIncrement(expression, lhs, opType, operandName);
-                if (!returnCode.isEmpty()) return returnCode;
+        if (lhs instanceof ArrayOperand) {
+            ArrayOperand operand = (ArrayOperand) lhs;
+            assign.append("aload").append(getVarNum(operand.getName())).append("\n");
+            assign.append(getLoad(operand.getIndexOperands().get(0)));
+        }
+        else {
+            if (rhs.getInstType() == InstructionType.BINARYOPER) {
+                BinaryOpInstruction expression = (BinaryOpInstruction) rhs;
+                boolean lhsIsLiteral = expression.getLeftOperand().isLiteral();
+                boolean rhsIsLiteral = expression.getRightOperand().isLiteral();
+                OperationType opType = expression.getOperation().getOpType();
+                if (opType == OperationType.ADD || opType == OperationType.SUB) {
+                    String operator = opType == OperationType.ADD ? "" : "-";
+                    int register = variables.get(operandName).getVirtualReg();
+                    if (!lhsIsLiteral && rhsIsLiteral) {
+                        String leftOperandName = ((Operand) expression.getLeftOperand()).getName();
+                        if (leftOperandName.equals(lhs.getName())) {
+                            String literal = operator + ((LiteralElement) expression.getRightOperand()).getLiteral();
+                            return "iinc " + register + " " + literal;
+                        }
+                    } else if (lhsIsLiteral && !rhsIsLiteral) {
+                        String rightOperandName = ((Operand) expression.getRightOperand()).getName();
+                        if (rightOperandName.equals(lhs.getName())) {
+                            String literal = operator + ((LiteralElement) expression.getLeftOperand()).getLiteral();
+                            return "iinc " + register + " " + literal;
+                        }
+                    }
+                }
             }
         }
         assign.append(getInstruction(rhs).strip()).append("\n").append(getStore(lhs));
