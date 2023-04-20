@@ -36,8 +36,39 @@ public class ArrayVisitor extends AJmmVisitor<Object, Type> {
     private Type dealWithArray(JmmNode jmmNode, Object dummy) {
 
         Type type = new Type("", false);
+        Type type1 = new Type("", false);
 
         // check if array access is done over array
+
+        switch(jmmNode.getJmmChild(0).getKind()) {
+            case "Parenthesis":
+                ExpressionVisitor expressionVisitor = new ExpressionVisitor(symbolTable);
+                type1 = expressionVisitor.visit(jmmNode.getJmmChild(0), 0);
+                break;
+            case "IntValue":
+            case "BooleanValue":
+            case "Identifier":
+                VariableVisitor variableVisitor = new VariableVisitor(symbolTable);
+                type1 = variableVisitor.visit(jmmNode.getJmmChild(0), 0);
+                break;
+            case "LengthMethod":
+            case "MethodCall":
+                MethodVisitor methodVisitor = new MethodVisitor(symbolTable);
+                type1 = methodVisitor.visit(jmmNode.getJmmChild(0), 0);
+                break;
+            case "BinaryOp":
+            case "UnaryOp":
+                OperationTypeVisitor opVisitor = new OperationTypeVisitor(symbolTable);
+                type1 = opVisitor.visit(jmmNode.getJmmChild(0), 0);
+                break;
+            case "ArraySubscript":
+                type1 = this.visit(jmmNode.getJmmChild(0), 0);
+                break;
+        }
+
+        if (!type1.isArray() && type1.getName().equals("int")) {
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, 0, 0, "Array access on invalid type"));
+        }
 
 
 
@@ -74,7 +105,7 @@ public class ArrayVisitor extends AJmmVisitor<Object, Type> {
         }
 
 
-        return type;
+        return new Type("int", true);
     }
 
 
