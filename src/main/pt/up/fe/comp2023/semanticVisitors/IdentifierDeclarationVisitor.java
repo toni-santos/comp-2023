@@ -63,7 +63,7 @@ public class IdentifierDeclarationVisitor extends AJmmVisitor<Object, Type> {
             List<Symbol> fields = symbolTable.getFields();
             for(Symbol field : fields) {
                 if(field.getName().equals(name)) {
-                    if (parent.get("methodName").equals("main")) {
+                    if (method.equals("main")) {
                         reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col,
                                 "Variable " + name + " is a field and cannot be used in main method"));
                     }

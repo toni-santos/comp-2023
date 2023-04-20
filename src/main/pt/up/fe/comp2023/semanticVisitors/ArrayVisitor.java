@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ArrayVisitor extends AJmmVisitor<Object, Boolean> {
+public class ArrayVisitor extends AJmmVisitor<Object, Type> {
 
     List<Report> reports = new ArrayList<>();
     SimpleSymbolTable symbolTable;
@@ -33,24 +33,58 @@ public class ArrayVisitor extends AJmmVisitor<Object, Boolean> {
         addVisit("ArraySubscript", this::dealWithArray);
     }
 
-    private Boolean dealWithArray(JmmNode jmmNode, Object dummy) {
+    private Type dealWithArray(JmmNode jmmNode, Object dummy) {
+
+        Type type = new Type("", false);
+
         // check if array access is done over array
 
+
+
         // check if index is integer
-        JmmNode index = jmmNode.getJmmChild(0);
+
+        switch(jmmNode.getJmmChild(1).getKind()) {
+            case "Parenthesis":
+                ExpressionVisitor expressionVisitor = new ExpressionVisitor(symbolTable);
+                type = expressionVisitor.visit(jmmNode.getJmmChild(1), 0);
+                break;
+            case "IntValue":
+            case "BooleanValue":
+            case "Identifier":
+                VariableVisitor variableVisitor = new VariableVisitor(symbolTable);
+                type = variableVisitor.visit(jmmNode.getJmmChild(1), 0);
+                break;
+            case "LengthMethod":
+            case "MethodCall":
+                MethodVisitor methodVisitor = new MethodVisitor(symbolTable);
+                type = methodVisitor.visit(jmmNode.getJmmChild(1), 0);
+                break;
+            case "BinaryOp":
+            case "UnaryOp":
+                OperationTypeVisitor opVisitor = new OperationTypeVisitor(symbolTable);
+                type = opVisitor.visit(jmmNode.getJmmChild(1), 0);
+                break;
+            case "ArraySubscript":
+                type = this.visit(jmmNode.getJmmChild(1), 0);
+                break;
+        }
+
+        if (!type.getName().equals("int")) {
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, 0, 0, "Array index must be an integer"));
+        }
 
 
-        return true;
+        return type;
     }
 
 
 
 
-    private Boolean dealNext(JmmNode jmmNode, Object dummy) {
+    private Type dealNext(JmmNode jmmNode, Object dummy) {
         for (JmmNode child : jmmNode.getChildren()) {
             visit(child);
         }
-        return true;
+        return new Type("", false);
     }
 
     public List<Report> getReports() {
