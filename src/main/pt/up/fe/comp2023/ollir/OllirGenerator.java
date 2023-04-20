@@ -73,7 +73,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
     }
 
     private String dealWithMethodCallExpression(JmmNode jmmNode, OllirTemp temp) {
-        String callerName = visit(jmmNode.getJmmChild(0), new OllirTemp());
+        String callerName = visit(jmmNode.getJmmChild(0), new OllirTemp(null, true));
         String methodName = jmmNode.get("value");
         String callerType, invokeMethod, returnType, argsString;
         ArrayList<String> args = new ArrayList<String>();
@@ -226,19 +226,20 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
     }
 
     private String dealWithNewObject(JmmNode jmmNode, OllirTemp temp) {
-        String retType = "." + jmmNode.get("value");
-        String string = "new(" + jmmNode.get("value") + ")" + retType;
+        String value = jmmNode.get("value");
+        String retType = "." + value;
+        String newString = "new(" + value + ")" + retType;
 
         if (temp.isTemp()) {
             this.auxNum++;
             String auxNumber = this.auxNum.toString();
             String auxString = "aux" + auxNumber + retType;
-            code.append(getIndent()).append(auxString).append(" :=").append(retType).append(" ").append(string).append(";\n");
-            code.append(getIndent()).append("invokespecial(").append(string).append(",\"<init>\").V;\n");
+            code.append(getIndent()).append(auxString).append(" :=").append(retType).append(" ").append(newString).append(";\n");
+            code.append(getIndent()).append("invokespecial(").append(auxString).append(",\"<init>\").V;\n");
             return auxString;
         }
 
-        return string;
+        return newString;
     }
 
     private String dealWithIntValueExpression(JmmNode jmmNode, OllirTemp temp) {
