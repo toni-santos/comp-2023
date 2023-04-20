@@ -128,9 +128,9 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
                 } else {
                     auxType = "." + temp.getType();
                 }
-                String auxString = "aux" + auxNumber + auxType;
+                String auxString = "aux" + auxNumber + returnType;
 
-                code.append(getIndent()).append(auxString).append(" :=").append(auxType).append(" ").append(string).append(";\n");
+                code.append(getIndent()).append(auxString).append(" :=").append(returnType).append(" ").append(string).append(";\n");
 
                 return auxString;
             }
