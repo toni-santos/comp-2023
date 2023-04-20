@@ -289,7 +289,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
 
             code.append(getIndent()).append("putfield(this, ").append(variableString).append(", ").append(child).append(").").append(type).append(";\n");
         } else {
-            String child = visit(jmmNode.getJmmChild(1), new OllirTemp(type, false));
+            String child = visit(jmmNode.getJmmChild(1), new OllirTemp(type, true));
 
             code.append(getIndent()).append(variableString).append(" :=.").append(type).append(" ").append(child).append(";\n");
         }
