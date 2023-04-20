@@ -285,7 +285,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         if (isClassField) {
             String child = visit(jmmNode.getJmmChild(1), new OllirTemp(type, true));
 
-            code.append(getIndent()).append("putfield(this, ").append(variableString).append(child).append(").").append(type).append(";\n");
+            code.append(getIndent()).append("putfield(this, ").append(variableString).append(", ").append(child).append(").").append(type).append(";\n");
         } else {
             String child = visit(jmmNode.getJmmChild(1), new OllirTemp(type, false));
 
@@ -381,7 +381,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         // Class Fields
         for (Symbol field : symbolTable.getFields()) {
             code.append(getIndent()).append(".field public ").append(field.getName()).append(toOllirType(field.getType())).append(";\n");
-            methodParamsMap.put(field.getName(), field.getName() + toOllirType(field.getType()));
+            classFieldsMap.put(field.getName(), field.getName() + toOllirType(field.getType()));
         }
 
         // Defalut constructor

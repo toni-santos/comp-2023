@@ -40,6 +40,7 @@ public class ExpressionVisitor extends AJmmVisitor<Object, Type> {
         //Integer line = Integer.valueOf(jmmNode.get("line"));
         //Integer col = Integer.valueOf(jmmNode.get("col"));
         while(!parentNode.getKind().equals("methodDeclaration") && !parentNode.getKind().equals("importDeclaration")) {
+            if (parentNode.getJmmParent() == null) break;
             parentNode = parentNode.getJmmParent();
         }
         if (parentNode.getKind().equals("methodDeclaration")) {
