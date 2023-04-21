@@ -295,8 +295,13 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
             String childValue = jmmNode.getJmmChild(1).get("value");
             if (this.classFieldsMap.containsKey(childValue)) {
                 String childOllir = variableToOllirString(childValue);
-
-                code.append(getIndent()).append(variableString).append(" :=.").append(type).append(" getfield(this, ").append(childOllir).append(").").append(type).append(";");
+                if (this.classFieldsMap.containsKey(variableName)) {
+                    String auxString = "aux" + auxNum + "." + type;
+                    code.append(getIndent()).append(auxString).append(" :=.").append(type).append(" getfield(this, ").append(childOllir).append(").").append(type).append(";\n");
+                    code.append(getIndent()).append("putfield(this, ").append(variableString).append(", ").append(auxString).append(").").append(type).append(";");
+                } else {
+                    code.append(getIndent()).append(variableString).append(" :=.").append(type).append(" getfield(this, ").append(childOllir).append(").").append(type).append(";");
+                }
                 return "";
             }
         }
