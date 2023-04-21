@@ -99,7 +99,11 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
             invokeMethod = "invokevirtual";
             returnType = toOllirType(symbolTable.getReturnType(methodName));
         } else {
-            invokeMethod = "invokestatic";
+            if (symbolTable.getImports().contains(callerType)) {
+                invokeMethod = "invokevirtual";
+            } else {
+                invokeMethod = "invokestatic";
+            }
             returnType = ".V";
         }
 
