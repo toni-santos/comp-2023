@@ -298,9 +298,9 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
                 if (this.classFieldsMap.containsKey(variableName)) {
                     String auxString = "aux" + auxNum + "." + type;
                     code.append(getIndent()).append(auxString).append(" :=.").append(type).append(" getfield(this, ").append(childOllir).append(").").append(type).append(";\n");
-                    code.append(getIndent()).append("putfield(this, ").append(variableString).append(", ").append(auxString).append(").").append(type).append(";");
+                    code.append(getIndent()).append("putfield(this, ").append(variableString).append(", ").append(auxString).append(").V").append(";");
                 } else {
-                    code.append(getIndent()).append(variableString).append(" :=.").append(type).append(" getfield(this, ").append(childOllir).append(").").append(type).append(";");
+                    code.append(getIndent()).append(variableString).append(" :=.").append(type).append(" getfield(this, ").append(childOllir).append(").V").append(";");
                 }
                 return "";
             }
@@ -309,7 +309,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         if (isClassField) {
             String child = visit(jmmNode.getJmmChild(1), new OllirTemp(type, true));
 
-            code.append(getIndent()).append("putfield(this, ").append(variableString).append(", ").append(child).append(").").append(type).append(";\n");
+            code.append(getIndent()).append("putfield(this, ").append(variableString).append(", ").append(child).append(").V").append(";\n");
         } else {
             String child;
 
