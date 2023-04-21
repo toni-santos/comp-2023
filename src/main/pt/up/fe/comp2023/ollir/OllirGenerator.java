@@ -122,12 +122,6 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
                 return string;
             } else {
                 String auxNumber = this.auxNum.toString();
-                String auxType;
-                if (temp.getType().startsWith(".")) {
-                    auxType = temp.getType();
-                } else {
-                    auxType = "." + temp.getType();
-                }
                 String auxString = "aux" + auxNumber + returnType;
 
                 code.append(getIndent()).append(auxString).append(" :=").append(returnType).append(" ").append(string).append(";\n");
