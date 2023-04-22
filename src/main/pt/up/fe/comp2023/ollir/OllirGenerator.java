@@ -75,6 +75,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
 
     private String dealWithMethodCallExpression(JmmNode jmmNode, OllirTemp temp) {
         String callerName = visit(jmmNode.getJmmChild(0), new OllirTemp(null, true));
+        System.out.println(jmmNode.getJmmChild(0));
         String methodName = jmmNode.get("value");
         String callerType, invokeMethod, returnType, argsString;
         ArrayList<String> args = new ArrayList<String>();
@@ -462,6 +463,10 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
     }
 
     private String variableToOllirString(String variable) {
+        if (variable.equals(symbolTable.getClassName())) {
+            return "this";
+        }
+
         boolean isMethodParam = this.methodParamsMap.containsKey(variable);
         boolean isClassField = this.classFieldsMap.containsKey(variable);
         boolean isMethodField = this.methodFieldsMap.containsKey(variable);
