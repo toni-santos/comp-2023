@@ -119,12 +119,22 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
             argsString = "";
         }
 
-        String string = invokeMethod + "(" + callerName + ", " + "\"" + methodName + "\"" + argsString + ")"+ returnType;
+        String string;
 
         if (temp.isTemp()) {
             if (callerType.equals(".V")) {
-                return string;
+                returnType =  "." + temp.getType();
+                string = invokeMethod + "(" + callerName + ", " + "\"" + methodName + "\"" + argsString + ")"+ returnType;
+                String auxNumber = this.auxNum.toString();
+                String auxString = "aux" + auxNumber + returnType;
+
+                code.append(getIndent()).append(auxString).append(" :=").append(returnType).append(" ").append(string).append(";\n");
+                this.auxNum++;
+
+                return auxString;
             } else {
+                returnType =  "." + temp.getType();
+                string = invokeMethod + "(" + callerName + ", " + "\"" + methodName + "\"" + argsString + ")"+ returnType;
                 String auxNumber = this.auxNum.toString();
                 String auxString = "aux" + auxNumber + returnType;
 
@@ -134,6 +144,8 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
                 return auxString;
             }
         }
+
+        string = invokeMethod + "(" + callerName + ", " + "\"" + methodName + "\"" + argsString + ")"+ returnType;
 
         return string;
     }
@@ -316,7 +328,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
             if (jmmNode.getJmmChild(1).getKind().equals("MethodCall")) {
                 child = visit(jmmNode.getJmmChild(1), new OllirTemp(type, true));
             } else {
-                child = visit(jmmNode.getJmmChild(1), new OllirTemp(type, false));
+                child = visit(jmmNode.getJmmChild(1), new OllirTemp(type, true));
             }
 
             code.append(getIndent()).append(variableString).append(" :=.").append(type).append(" ").append(child).append(";\n");
