@@ -88,7 +88,8 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
                 if (this.symbolTable.getImports().contains(callerName)) {
                     callerType = ".V";
                 } else {
-                    callerType = callerName.split("\\.")[1];
+                    String[] callerSplit = callerName.split("\\.");
+                    callerType = callerSplit[callerSplit.length-1];
                 }
             } else {
                 callerType = "this";
@@ -365,13 +366,6 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
 
         // Method Local Variables
         for (Symbol variable : localVariables) {
-            String type = toOllirType(variable.getType());
-            code.append(getIndent()).append(variable.getName()).append(type).append(" :=").append(type).append(" ").append(getDefaultValueFromType(type)).append(";\n");
-
-            if (!primitiveTypes.contains(type)) {
-                code.append(getIndent()).append("invokespecial(").append(variable.getName()).append(type).append(",\"<init>\").V;\n");
-            }
-
             methodFieldsMap.put(variable.getName(), variable.getName() + toOllirType(variable.getType()));
         }
         code.append("\n");
