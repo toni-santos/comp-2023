@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class AssignmentVisitor extends AJmmVisitor<Object, Boolean> {
+public class AssignmentVisitor extends AJmmVisitor<Object, Type> {
 
     List<Report> reports = new ArrayList<>();
     SimpleSymbolTable symbolTable;
@@ -33,19 +33,71 @@ public class AssignmentVisitor extends AJmmVisitor<Object, Boolean> {
         addVisit("DeclarationStatement", this::dealWithAssignment);
     }
 
-    private Boolean dealWithAssignment(JmmNode jmmNode, Object dummy) {
+    private Type dealWithAssignment(JmmNode jmmNode, Object dummy) {
 
-        return true;
+        Type lhs = new Type("", false);
+        Type rhs = new Type("", false);
+
+        IdentifierDeclarationVisitor idVisitor = new IdentifierDeclarationVisitor(symbolTable);
+        lhs = idVisitor.visit(jmmNode.getJmmChild(0), 0);
+
+        switch(jmmNode.getJmmChild(1).getKind()) {
+            case "This":
+            case "Parenthesis":
+                ExpressionVisitor expressionVisitor = new ExpressionVisitor(symbolTable);
+                rhs = expressionVisitor.visit(jmmNode.getJmmChild(1), 0);
+                break;
+            case "IntValue":
+            case "BooleanValue":
+            case "Identifier":
+                VariableVisitor variableVisitor = new VariableVisitor(symbolTable);
+                rhs = variableVisitor.visit(jmmNode.getJmmChild(1), 0);
+                break;
+            case "LengthMethod":
+            case "MethodCall":
+                MethodVisitor methodVisitor = new MethodVisitor(symbolTable);
+                rhs = methodVisitor.visit(jmmNode.getJmmChild(1), 0);
+                break;
+            case "BinaryOp":
+            case "UnaryOp":
+                OperationTypeVisitor opVisitor = new OperationTypeVisitor(symbolTable);
+                rhs = opVisitor.visit(jmmNode.getJmmChild(1), 0);
+                break;
+            case "ArraySubscript":
+                ArrayVisitor arrayVisitor = new ArrayVisitor(symbolTable);
+                rhs = arrayVisitor.visit(jmmNode.getJmmChild(1), 0);
+                break;
+            default:
+                rhs = visit(jmmNode.getJmmChild(1));
+                break;
+        }
+        //int line = Integer.valueOf(jmmNode.getJmmChild(0).get("line"));
+        //int col = Integer.valueOf(jmmNode.getJmmChild(0).get("col"));
+        int line = 0;
+        int col = 0;
+
+        if (lhs.isArray() && !rhs.isArray() && !jmmNode.getJmmChild(1).getKind().equals("NewArray"))
+        {
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col, "Arrays can only be assigned array values"));
+        }
+
+        if(!lhs.getName().equals(rhs.getName()) &&
+                ( !symbolTable.getImports().contains(lhs.getName()) || !symbolTable.getImports().contains(rhs.getName())) &&
+                (!lhs.getName().equals(symbolTable.getSuper()) || !rhs.getName().equals(symbolTable.getClassName())))
+        {
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col, "Error in attribuition: imcompatible types -> " + lhs.getName() + " : " + rhs.getName()));
+        }
+        return new Type(lhs.getName(), lhs.isArray());
     }
 
 
 
 
-    private Boolean dealNext(JmmNode jmmNode, Object dummy) {
+    private Type dealNext(JmmNode jmmNode, Object dummy) {
         for (JmmNode child : jmmNode.getChildren()) {
             visit(child);
         }
-        return true;
+        return new Type("", false);
     }
 
     public List<Report> getReports() {

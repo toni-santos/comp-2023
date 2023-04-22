@@ -32,9 +32,60 @@ public class IdentifierDeclarationVisitor extends AJmmVisitor<Object, Type> {
         setDefaultVisit(this::dealNext);
 
         addVisit("Identifier", this::dealWithId);
+        addVisit("Type", this::dealWithIdType);
     }
 
     private Type dealWithId(JmmNode jmmNode, Object dummy) {
+
+        String name = jmmNode.get("value");
+        //int line = Integer.valueOf(jmmNode.get("line"));
+        //int col = Integer.valueOf(jmmNode.get("col"));
+        int line = 0;
+        int col = 0;
+        JmmNode parent = jmmNode.getJmmParent();
+        while(!parent.getKind().equals("MethodDeclaration") && !parent.getKind().equals("ImportDeclaration")) {
+            parent = parent.getJmmParent();
+        }
+
+        if(!parent.getKind().equals("ImportDeclaration")) {
+            String method = parent.get("methodName");
+            List<Symbol> locals = symbolTable.getLocalVariables(method);
+            for(Symbol local : locals) {
+                if(local.getName().equals(name)) {
+                    return local.getType();
+                }
+            }
+            List<Symbol> params = symbolTable.getParameters(method);
+            for(Symbol param : params) {
+                if(param.getName().equals(name)) {
+                    return param.getType();
+                }
+            }
+            List<Symbol> fields = symbolTable.getFields();
+            for(Symbol field : fields) {
+                if(field.getName().equals(name)) {
+                    if (method.equals("main")) {
+                        reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col,
+                                "Variable " + name + " is a field and cannot be used in main method"));
+                    }
+                    return field.getType();
+                }
+            }
+            if((symbolTable.getImports() == null || !symbolTable.getImports().contains(name)) && (symbolTable.getSuper() == null || !symbolTable.getSuper().equals(name)) && !symbolTable.getClassName().equals(name)) {
+                reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col, "Error: variable " + name + " not declared"));
+            }
+        }
+        return new Type("", false);
+    }
+
+    private Type dealWithIdType(JmmNode jmmNode, Object dummy) {
+
+        if (!jmmNode.hasAttribute("value")){
+            return new Type("", false);
+        }
+        else if (jmmNode.get("value").equals("int") || jmmNode.get("value").equals("boolean") || jmmNode.get("value").equals("void")){
+            return new Type("", false);
+        }
 
         String name = jmmNode.get("value");
         //int line = Integer.valueOf(jmmNode.get("line"));

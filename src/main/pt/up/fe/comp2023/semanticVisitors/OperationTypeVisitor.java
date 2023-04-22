@@ -149,8 +149,10 @@ public class OperationTypeVisitor extends AJmmVisitor<Object, Type> {
             case "UnaryOp":
                 type = this.visit(jmmNode.getJmmChild(0), 0);
                 break;
+            case "LengthMethod":
             case "MethodCall":
-                // visit and get type
+                MethodVisitor methodVisitor = new MethodVisitor(symbolTable);
+                type = methodVisitor.visit(jmmNode.getJmmChild(0), 0);
                 break;
             case "BooleanValue":
             case "Identifier":
