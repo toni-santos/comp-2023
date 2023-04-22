@@ -49,6 +49,8 @@ public class AssignmentVisitor extends AJmmVisitor<Object, Type> {
                 break;
             case "IntValue":
             case "BooleanValue":
+            case "NewObject":
+            case "NewArray":
             case "Identifier":
                 VariableVisitor variableVisitor = new VariableVisitor(symbolTable);
                 rhs = variableVisitor.visit(jmmNode.getJmmChild(1), 0);

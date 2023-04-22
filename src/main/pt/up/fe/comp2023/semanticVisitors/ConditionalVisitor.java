@@ -53,9 +53,14 @@ public class ConditionalVisitor extends AJmmVisitor<Object, Boolean> {
                 OperationTypeVisitor opVisitor = new OperationTypeVisitor(symbolTable);
                 type = opVisitor.visit(jmmNode.getJmmChild(0), 0);
                 break;
+            case "LengthMethod":
             case "MethodCall":
-                // visit and get type
+                MethodVisitor methodVisitor = new MethodVisitor(symbolTable);
+                type = methodVisitor.visit(jmmNode.getJmmChild(1), 0);
                 break;
+            case "IntValue":
+            case "NewObject":
+            case "NewArray":
             case "BooleanValue":
             case "Identifier":
                 VariableVisitor variableVisitor = new VariableVisitor(symbolTable);
@@ -91,9 +96,14 @@ public class ConditionalVisitor extends AJmmVisitor<Object, Boolean> {
                 OperationTypeVisitor opVisitor = new OperationTypeVisitor(symbolTable);
                 type = opVisitor.visit(jmmNode.getJmmChild(0), 0);
                 break;
+            case "LengthMethod":
             case "MethodCall":
-                // visit and get type
+                MethodVisitor methodVisitor = new MethodVisitor(symbolTable);
+                type = methodVisitor.visit(jmmNode.getJmmChild(1), 0);
                 break;
+            case "IntValue":
+            case "NewObject":
+            case "NewArray":
             case "BooleanValue":
             case "Identifier":
                 VariableVisitor variableVisitor = new VariableVisitor(symbolTable);

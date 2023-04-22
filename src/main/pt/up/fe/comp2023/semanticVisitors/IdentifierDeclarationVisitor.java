@@ -122,7 +122,10 @@ public class IdentifierDeclarationVisitor extends AJmmVisitor<Object, Type> {
                 }
             }
             if((symbolTable.getImports() == null || !symbolTable.getImports().contains(name)) && (symbolTable.getSuper() == null || !symbolTable.getSuper().equals(name)) && !symbolTable.getClassName().equals(name)) {
-                reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col, "Error: variable " + name + " not declared"));
+                reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col, "Error: invalid type"));
+            }
+            else{
+                return new Type(name, false);
             }
         }
         return new Type("", false);

@@ -47,6 +47,8 @@ public class ArrayVisitor extends AJmmVisitor<Object, Type> {
                 break;
             case "IntValue":
             case "BooleanValue":
+            case "NewObject":
+            case "NewArray":
             case "Identifier":
                 VariableVisitor variableVisitor = new VariableVisitor(symbolTable);
                 type1 = variableVisitor.visit(jmmNode.getJmmChild(0), 0);
@@ -81,6 +83,8 @@ public class ArrayVisitor extends AJmmVisitor<Object, Type> {
                 break;
             case "IntValue":
             case "BooleanValue":
+            case "NewObject":
+            case "NewArray":
             case "Identifier":
                 VariableVisitor variableVisitor = new VariableVisitor(symbolTable);
                 type = variableVisitor.visit(jmmNode.getJmmChild(1), 0);
