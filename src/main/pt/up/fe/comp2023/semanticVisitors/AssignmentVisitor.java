@@ -55,7 +55,7 @@ public class AssignmentVisitor extends AJmmVisitor<Object, Type> {
                 VariableVisitor variableVisitor = new VariableVisitor(symbolTable);
                 rhs = variableVisitor.visit(jmmNode.getJmmChild(1), 0);
                 break;
-            case "LengthMethod":
+            case "Length":
             case "MethodCall":
                 MethodVisitor methodVisitor = new MethodVisitor(symbolTable);
                 rhs = methodVisitor.visit(jmmNode.getJmmChild(1), 0);

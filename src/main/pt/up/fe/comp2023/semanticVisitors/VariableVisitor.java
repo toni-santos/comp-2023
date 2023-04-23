@@ -65,7 +65,7 @@ public class VariableVisitor extends AJmmVisitor<Object, Type>{
                 VariableVisitor variableVisitor = new VariableVisitor(symbolTable);
                 type = variableVisitor.visit(jmmNode.getJmmChild(0), 0);
                 break;
-            case "LengthMethod":
+            case "Length":
             case "MethodCall":
                 MethodVisitor methodVisitor = new MethodVisitor(symbolTable);
                 type = methodVisitor.visit(jmmNode.getJmmChild(0), 0);

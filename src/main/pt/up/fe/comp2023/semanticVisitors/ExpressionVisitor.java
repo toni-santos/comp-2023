@@ -67,7 +67,7 @@ public class ExpressionVisitor extends AJmmVisitor<Object, Type> {
             case "NewArray":
                 VariableVisitor variableVisitor = new VariableVisitor(symbolTable);
                 return variableVisitor.visit(expr, 0);
-            case "LengthMethod":
+            case "Length":
             case "MethodCall":{
                 MethodVisitor methodVisitor = new MethodVisitor(symbolTable);
                 return methodVisitor.visit(expr, 0);

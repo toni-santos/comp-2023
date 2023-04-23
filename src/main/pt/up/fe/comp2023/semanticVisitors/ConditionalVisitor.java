@@ -40,6 +40,7 @@ public class ConditionalVisitor extends AJmmVisitor<Object, Boolean> {
         Type type = new Type("", false);
 
         switch(jmmNode.getJmmChild(0).getKind()) {
+            case "This":
             case "Parenthesis":
                 ExpressionVisitor expressionVisitor = new ExpressionVisitor(symbolTable);
                 type = expressionVisitor.visit(jmmNode.getJmmChild(0), 0);
@@ -53,7 +54,7 @@ public class ConditionalVisitor extends AJmmVisitor<Object, Boolean> {
                 OperationTypeVisitor opVisitor = new OperationTypeVisitor(symbolTable);
                 type = opVisitor.visit(jmmNode.getJmmChild(0), 0);
                 break;
-            case "LengthMethod":
+            case "Length":
             case "MethodCall":
                 MethodVisitor methodVisitor = new MethodVisitor(symbolTable);
                 type = methodVisitor.visit(jmmNode.getJmmChild(1), 0);
@@ -83,6 +84,7 @@ public class ConditionalVisitor extends AJmmVisitor<Object, Boolean> {
         Type type = new Type("", false);
 
         switch(jmmNode.getJmmChild(0).getKind()) {
+            case "This":
             case "Parenthesis":
                 ExpressionVisitor expressionVisitor = new ExpressionVisitor(symbolTable);
                 type = expressionVisitor.visit(jmmNode.getJmmChild(0), 0);

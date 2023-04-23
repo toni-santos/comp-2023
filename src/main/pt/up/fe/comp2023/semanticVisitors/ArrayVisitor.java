@@ -53,7 +53,7 @@ public class ArrayVisitor extends AJmmVisitor<Object, Type> {
                 VariableVisitor variableVisitor = new VariableVisitor(symbolTable);
                 type1 = variableVisitor.visit(jmmNode.getJmmChild(0), 0);
                 break;
-            case "LengthMethod":
+            case "Length":
             case "MethodCall":
                 MethodVisitor methodVisitor = new MethodVisitor(symbolTable);
                 type1 = methodVisitor.visit(jmmNode.getJmmChild(0), 0);
@@ -89,7 +89,7 @@ public class ArrayVisitor extends AJmmVisitor<Object, Type> {
                 VariableVisitor variableVisitor = new VariableVisitor(symbolTable);
                 type = variableVisitor.visit(jmmNode.getJmmChild(1), 0);
                 break;
-            case "LengthMethod":
+            case "Length":
             case "MethodCall":
                 MethodVisitor methodVisitor = new MethodVisitor(symbolTable);
                 type = methodVisitor.visit(jmmNode.getJmmChild(1), 0);

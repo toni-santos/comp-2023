@@ -78,11 +78,13 @@ public class OperationTypeVisitor extends AJmmVisitor<Object, Type> {
                 break;
             case "IntValue":
             case "BooleanValue":
+            case "NewObject":
+            case "NewArray":
             case "Identifier":
                 VariableVisitor variableVisitor = new VariableVisitor(symbolTable);
                 rhs = variableVisitor.visit(jmmNode.getJmmChild(1), 0);
                 break;
-            case "LengthMethod":
+            case "Length":
             case "MethodCall":
                 MethodVisitor methodVisitor = new MethodVisitor(symbolTable);
                 rhs = methodVisitor.visit(jmmNode.getJmmChild(1), 0);
@@ -149,12 +151,15 @@ public class OperationTypeVisitor extends AJmmVisitor<Object, Type> {
             case "UnaryOp":
                 type = this.visit(jmmNode.getJmmChild(0), 0);
                 break;
-            case "LengthMethod":
+            case "Length":
             case "MethodCall":
                 MethodVisitor methodVisitor = new MethodVisitor(symbolTable);
                 type = methodVisitor.visit(jmmNode.getJmmChild(0), 0);
                 break;
+            case "IntValue":
             case "BooleanValue":
+            case "NewObject":
+            case "NewArray":
             case "Identifier":
                 VariableVisitor variableVisitor = new VariableVisitor(symbolTable);
                 type = variableVisitor.visit(jmmNode.getJmmChild(0), 0);
