@@ -40,6 +40,10 @@ public class ConditionalVisitor extends AJmmVisitor<Object, Boolean> {
         Type type = new Type("", false);
 
         switch(jmmNode.getJmmChild(0).getKind()) {
+            case "DeclarationStatement":
+                AssignmentVisitor assignmentVisitor = new AssignmentVisitor(symbolTable);
+                type = assignmentVisitor.visit(jmmNode.getJmmChild(0), 0);
+                break;
             case "This":
             case "Parenthesis":
                 ExpressionVisitor expressionVisitor = new ExpressionVisitor(symbolTable);
@@ -84,6 +88,10 @@ public class ConditionalVisitor extends AJmmVisitor<Object, Boolean> {
         Type type = new Type("", false);
 
         switch(jmmNode.getJmmChild(0).getKind()) {
+            case "DeclarationStatement":
+                AssignmentVisitor assignmentVisitor = new AssignmentVisitor(symbolTable);
+                type = assignmentVisitor.visit(jmmNode.getJmmChild(0), 0);
+                break;
             case "This":
             case "Parenthesis":
                 ExpressionVisitor expressionVisitor = new ExpressionVisitor(symbolTable);
@@ -110,9 +118,6 @@ public class ConditionalVisitor extends AJmmVisitor<Object, Boolean> {
             case "Identifier":
                 VariableVisitor variableVisitor = new VariableVisitor(symbolTable);
                 type = variableVisitor.visit(jmmNode.getJmmChild(0), 0);
-                break;
-            default:
-                this.visit(jmmNode.getJmmChild(0));
                 break;
         }
         //int line = Integer.valueOf(jmmNode.getJmmChild(0).get("line"));

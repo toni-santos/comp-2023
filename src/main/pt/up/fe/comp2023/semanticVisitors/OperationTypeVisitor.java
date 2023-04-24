@@ -42,6 +42,11 @@ public class OperationTypeVisitor extends AJmmVisitor<Object, Type> {
         Type rhs = new Type("", false);
 
         switch(jmmNode.getJmmChild(0).getKind()) {
+            case "DeclarationStatement":
+                AssignmentVisitor assignmentVisitor = new AssignmentVisitor(symbolTable);
+                lhs = assignmentVisitor.visit(jmmNode.getJmmChild(0), 0);
+                break;
+            case "This":
             case "Parenthesis":
                 ExpressionVisitor expressionVisitor = new ExpressionVisitor(symbolTable);
                 lhs = expressionVisitor.visit(jmmNode.getJmmChild(0), 0);
@@ -68,6 +73,11 @@ public class OperationTypeVisitor extends AJmmVisitor<Object, Type> {
         }
 
         switch(jmmNode.getJmmChild(1).getKind()) {
+            case "DeclarationStatement":
+                AssignmentVisitor assignmentVisitor = new AssignmentVisitor(symbolTable);
+                rhs = assignmentVisitor.visit(jmmNode.getJmmChild(1), 0);
+                break;
+            case "This":
             case "Parenthesis":
                 ExpressionVisitor expressionVisitor = new ExpressionVisitor(symbolTable);
                 rhs = expressionVisitor.visit(jmmNode.getJmmChild(1), 0);
@@ -139,6 +149,10 @@ public class OperationTypeVisitor extends AJmmVisitor<Object, Type> {
         Type type = new Type("", false);
 
         switch(jmmNode.getJmmChild(0).getKind()) {
+            case "DeclarationStatement":
+                AssignmentVisitor assignmentVisitor = new AssignmentVisitor(symbolTable);
+                type = assignmentVisitor.visit(jmmNode.getJmmChild(0), 0);
+                break;
             case "Parenthesis":
                 ExpressionVisitor expressionVisitor = new ExpressionVisitor(symbolTable);
                 type = expressionVisitor.visit(jmmNode.getJmmChild(0), 0);

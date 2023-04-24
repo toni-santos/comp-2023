@@ -73,6 +73,10 @@ public class MethodVisitor extends AJmmVisitor<Object, Type> {
             Type argType = new Type("", false);
 
             switch(jmmNode.getJmmChild(i).getKind()) {
+                case "DeclarationStatement":
+                    AssignmentVisitor assignmentVisitor = new AssignmentVisitor(symbolTable);
+                    argType = assignmentVisitor.visit(jmmNode.getJmmChild(i), 0);
+                    break;
                 case "Parenthesis":
                     ExpressionVisitor expressionVisitor = new ExpressionVisitor(symbolTable);
                     argType = expressionVisitor.visit(jmmNode.getJmmChild(i), 0);
