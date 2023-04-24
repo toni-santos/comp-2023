@@ -124,32 +124,36 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         String string;
 
         if (temp.isTemp()) {
-            if (callerType.equals(".V")) {
-                returnType =  "." + temp.getType();
-                string = invokeMethod + "(" + callerName + ", " + "\"" + methodName + "\"" + argsString + ")"+ returnType;
-                String auxNumber = this.auxNum.toString();
-                String auxString = "aux" + auxNumber + returnType;
 
-                code.append(getIndent()).append(auxString).append(" :=").append(returnType).append(" ").append(string).append(";\n");
-                this.auxNum++;
-
-                return auxString;
+            if (temp.getType() == null) {
+                if (symbolTable.getMethods().contains(methodName)) {
+                    returnType = toOllirType(symbolTable.getReturnType(methodName));
+                } else {
+                    returnType = ".V";
+                }
             } else {
-                returnType =  "." + temp.getType();
-                string = invokeMethod + "(" + callerName + ", " + "\"" + methodName + "\"" + argsString + ")"+ returnType;
-                String auxNumber = this.auxNum.toString();
-                String auxString = "aux" + auxNumber + returnType;
-
-                code.append(getIndent()).append(auxString).append(" :=").append(returnType).append(" ").append(string).append(";\n");
-                this.auxNum++;
-
-                return auxString;
+                returnType = addDot(temp.getType());
             }
+
+            string = invokeMethod + "(" + callerName + ", " + "\"" + methodName + "\"" + argsString + ")"+ returnType;
+
+            String auxString = "aux" + this.auxNum.toString() + returnType;
+
+            code.append(getIndent()).append(auxString).append(" :=").append(returnType).append(" ").append(string).append(";\n");
+            this.auxNum++;
+            return auxString;
         }
 
         string = invokeMethod + "(" + callerName + ", " + "\"" + methodName + "\"" + argsString + ")"+ returnType;
 
         return string;
+    }
+
+    private String addDot(String type) {
+        if (type.charAt(0) != '.') {
+            return "." + type;
+        }
+        return type;
     }
 
     private String dealWithUnaryOpExpression(JmmNode jmmNode, OllirTemp temp) {
@@ -279,7 +283,11 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         if (isParam) {
             code.append("\n").append(getIndent()).append("ret").append(retType).append(" ").append(this.methodParamsMap.get(child)).append(";");
         } else {
-            code.append("\n").append(getIndent()).append("ret").append(retType).append(" ").append(child).append(";");
+            if (child.equals("this")) {
+                code.append("\n").append(getIndent()).append("ret").append(retType).append(" ").append(child).append(retType).append(";");
+            } else {
+                code.append("\n").append(getIndent()).append("ret").append(retType).append(" ").append(child).append(";");
+            }
         }
 
         return "";
