@@ -211,7 +211,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
 
 
     private String dealWithThisExpression(JmmNode jmmNode, OllirTemp temp) {
-        return "this."+symbolTable.getClassName();
+        return "this";//+symbolTable.getClassName();
     }
 
     private String dealWithIdentifierExpression(JmmNode jmmNode, OllirTemp temp) {
