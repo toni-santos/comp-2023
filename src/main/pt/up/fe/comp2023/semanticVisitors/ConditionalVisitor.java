@@ -99,7 +99,7 @@ public class ConditionalVisitor extends AJmmVisitor<Object, Boolean> {
                 break;
             case "ArraySubscript":
                 ArrayVisitor arrayVisitor = new ArrayVisitor(symbolTable);
-                type = arrayVisitor.visit(jmmNode.getJmmChild(1), 0);
+                type = arrayVisitor.visit(jmmNode.getJmmChild(0), 0);
                 break;
             case "BinaryOp":
             case "UnaryOp":
@@ -109,7 +109,7 @@ public class ConditionalVisitor extends AJmmVisitor<Object, Boolean> {
             case "LengthMethod":
             case "MethodCall":
                 MethodVisitor methodVisitor = new MethodVisitor(symbolTable);
-                type = methodVisitor.visit(jmmNode.getJmmChild(1), 0);
+                type = methodVisitor.visit(jmmNode.getJmmChild(0), 0);
                 break;
             case "IntValue":
             case "NewObject":
