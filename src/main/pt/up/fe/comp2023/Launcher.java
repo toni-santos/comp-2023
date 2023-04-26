@@ -45,7 +45,7 @@ public class Launcher {
         SimpleAnalysis analysis = new SimpleAnalysis();
         JmmSemanticsResult semanticsResult = analysis.semanticAnalysis(parserResult);
 
-        //TestUtils.noErrors(semanticsResult.getReports());
+        TestUtils.noErrors(semanticsResult.getReports());
     }
 
     private static Map<String, String> parseArgs(String[] args) {

@@ -83,7 +83,9 @@ public class AssignmentVisitor extends AJmmVisitor<Object, Type> {
 
         if(!lhs.getName().equals(rhs.getName()) &&
                 ( !symbolTable.getImports().contains(lhs.getName()) || !symbolTable.getImports().contains(rhs.getName())) &&
-                (!lhs.getName().equals(symbolTable.getSuper()) || !rhs.getName().equals(symbolTable.getClassName())))
+                (!lhs.getName().equals(symbolTable.getSuper()) || !rhs.getName().equals(symbolTable.getClassName())) &&
+                !(lhs.getName().equals("int") && lhs.isArray() && rhs.getName().equals("array"))
+        )
         {
             reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col, "Error in attribuition: imcompatible types -> " + lhs.getName() + " : " + rhs.getName()));
         }
