@@ -137,7 +137,7 @@ public class ConditionalVisitor extends AJmmVisitor<Object, Boolean> {
 
     private Boolean dealNext(JmmNode jmmNode, Object dummy) {
         for (JmmNode child : jmmNode.getChildren()) {
-            visit(child);
+            this.visit(child, 0);
         }
         return true;
     }

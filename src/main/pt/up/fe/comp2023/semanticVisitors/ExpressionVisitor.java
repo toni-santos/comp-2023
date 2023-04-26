@@ -90,7 +90,7 @@ public class ExpressionVisitor extends AJmmVisitor<Object, Type> {
     private Type dealNext(JmmNode jmmNode, Object dummy) {
 
         for (JmmNode child : jmmNode.getChildren()) {
-            visit(child);
+            this.visit(child, 0);
         }
         return new Type("", false);
     }

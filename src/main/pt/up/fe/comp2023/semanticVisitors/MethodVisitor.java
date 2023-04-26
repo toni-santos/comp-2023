@@ -33,7 +33,6 @@ public class MethodVisitor extends AJmmVisitor<Object, Type> {
 
         addVisit("MethodCall", this::dealWithMethod);
         addVisit("Length", this::dealWithLength);
-        addVisit("MethodDeclaration", this::dealWithMethodDeclaration);
     }
 
     private Type dealWithMethod(JmmNode jmmNode, Object dummy) {
@@ -50,7 +49,7 @@ public class MethodVisitor extends AJmmVisitor<Object, Type> {
         int col = 0;
 
 
-        if (type == null && symbolTable.getSuper() != null || type == null && !symbolTable.getImports().isEmpty()) {
+        if (type == null && !symbolTable.getSuper().equals("") || type == null && !symbolTable.getImports().isEmpty()) {
             switch (jmmNode.getJmmParent().getKind()) {
                 case "DeclarationStatement":
                     JmmNode child = jmmNode.getJmmParent().getJmmChild(0);
@@ -58,14 +57,14 @@ public class MethodVisitor extends AJmmVisitor<Object, Type> {
                     type = variableVisitor.visit(child);
                     break;
                 default:
-                    type = visit(jmmNode.getJmmChild(0));
+                    type = this.visit(jmmNode.getJmmChild(0));
                     break;
             }
             return type;
         } else if (type == null && jmmNode.getJmmChild(0).getKind().equals("This")) {
             reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col, "Error on method " + jmmNode.get("value") + ": Method Undeclared"));
             return new Type("", false);
-        } else if (type == null && symbolTable.getSuper() == null && symbolTable.getImports().isEmpty()) {
+        } else if (type == null && symbolTable.getSuper().equals("") && symbolTable.getImports().isEmpty()) {
             reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col, "Error on method " + jmmNode.get("value") + ": Method Undeclared"));
             return new Type("", false);
         }
@@ -124,104 +123,12 @@ public class MethodVisitor extends AJmmVisitor<Object, Type> {
 
 
 
-    private Type dealWithMethodDeclaration(JmmNode jmmNode, Object dummy) {
-        if (jmmNode.get("methodName").equals("main")){
-            return new Type("", false);
-        }
-        int numOfChildren = jmmNode.getChildren().size() - 1;
-        if(numOfChildren > -1) {
-            Type type = new Type("", false);
-
-            switch(jmmNode.getJmmChild(numOfChildren).getJmmChild(0).getKind()) {
-                case "DeclarationStatement":
-                    AssignmentVisitor assignmentVisitor = new AssignmentVisitor(symbolTable);
-                    type = assignmentVisitor.visit(jmmNode.getJmmChild(numOfChildren).getJmmChild(0), 0);
-                    break;
-                case "This":
-                case "Parenthesis":
-                    ExpressionVisitor expressionVisitor = new ExpressionVisitor(symbolTable);
-                    type = expressionVisitor.visit(jmmNode.getJmmChild(numOfChildren).getJmmChild(0), 0);
-                    break;
-                case "ArraySubscript":
-                    ArrayVisitor arrayVisitor = new ArrayVisitor(symbolTable);
-                    type = arrayVisitor.visit(jmmNode.getJmmChild(numOfChildren).getJmmChild(0), 0);
-                    break;
-                case "BinaryOp":
-                case "UnaryOp":
-                    OperationTypeVisitor opVisitor = new OperationTypeVisitor(symbolTable);
-                    type = opVisitor.visit(jmmNode.getJmmChild(numOfChildren).getJmmChild(0), 0);
-                    break;
-                case "LengthMethod":
-                case "MethodCall":
-                    type = this.visit(jmmNode.getJmmChild(numOfChildren).getJmmChild(0), 0);
-                    break;
-                case "IntValue":
-                case "NewObject":
-                case "NewArray":
-                case "BooleanValue":
-                case "Identifier":
-                    VariableVisitor variableVisitor = new VariableVisitor(symbolTable);
-                    type = variableVisitor.visit(jmmNode.getJmmChild(numOfChildren).getJmmChild(0), 0);
-                    break;
-            }
-
-            int line = 0;
-            int col = 0;
-            if(type != null && !type.isArray()) {
-                if(!type.getName().equals(jmmNode.getJmmChild(0).get("value"))) {
-                    if(jmmNode.getJmmChild(numOfChildren).getJmmChild(0).getKind().equals("MethodCall")) {
-                        Type callerType = new Type("", false);
-                        switch(jmmNode.getJmmChild(numOfChildren).getJmmChild(0).getJmmChild(0).getKind()) {
-                            case "DeclarationStatement":
-                                AssignmentVisitor assignmentVisitor = new AssignmentVisitor(symbolTable);
-                                callerType = assignmentVisitor.visit(jmmNode.getJmmChild(numOfChildren).getJmmChild(0).getJmmChild(0), 0);
-                                break;
-                            case "This":
-                            case "Parenthesis":
-                                ExpressionVisitor expressionVisitor = new ExpressionVisitor(symbolTable);
-                                callerType = expressionVisitor.visit(jmmNode.getJmmChild(numOfChildren).getJmmChild(0).getJmmChild(0), 0);
-                                break;
-                            case "ArraySubscript":
-                                ArrayVisitor arrayVisitor = new ArrayVisitor(symbolTable);
-                                callerType = arrayVisitor.visit(jmmNode.getJmmChild(numOfChildren).getJmmChild(0).getJmmChild(0), 0);
-                                break;
-                            case "BinaryOp":
-                            case "UnaryOp":
-                                OperationTypeVisitor opVisitor = new OperationTypeVisitor(symbolTable);
-                                callerType = opVisitor.visit(jmmNode.getJmmChild(numOfChildren).getJmmChild(0).getJmmChild(0), 0);
-                                break;
-                            case "LengthMethod":
-                            case "MethodCall":
-                                callerType = this.visit(jmmNode.getJmmChild(numOfChildren).getJmmChild(0).getJmmChild(0), 0);
-                                break;
-                            case "IntValue":
-                            case "NewObject":
-                            case "NewArray":
-                            case "BooleanValue":
-                            case "Identifier":
-                                VariableVisitor variableVisitor = new VariableVisitor(symbolTable);
-                                callerType = variableVisitor.visit(jmmNode.getJmmChild(numOfChildren).getJmmChild(0).getJmmChild(0), 0);
-                                break;
-                        }
-                        if(!symbolTable.getImports().contains(callerType.getName())) {
-                            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col, "Error: invalid return type on method " + jmmNode.get("methodName") + " method not declared or imported"));
-                        }
-                    }
-                    else {
-                        reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col, "Error: invalid return type on method " + jmmNode.get("methodName") + ". Expected " + jmmNode.getJmmChild(0).get("value") + " but got " + type.getName()));
-                    }
-                }
-            }
-        }
-        return new Type("", false);
-    }
-
 
 
 
     private Type dealNext(JmmNode jmmNode, Object dummy) {
         for (JmmNode child : jmmNode.getChildren()) {
-            visit(child);
+            this.visit(child, 0);
         }
         return new Type("", false);
     }

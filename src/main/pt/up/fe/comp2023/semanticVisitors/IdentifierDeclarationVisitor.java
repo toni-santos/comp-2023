@@ -71,7 +71,7 @@ public class IdentifierDeclarationVisitor extends AJmmVisitor<Object, Type> {
                     return field.getType();
                 }
             }
-            if((symbolTable.getImports() == null || !symbolTable.getImports().contains(name)) && (symbolTable.getSuper() == null || !symbolTable.getSuper().equals(name)) && !symbolTable.getClassName().equals(name)) {
+            if((symbolTable.getImports() == null || !symbolTable.getImports().contains(name)) && (symbolTable.getSuper().equals("") || !symbolTable.getSuper().equals(name)) && !symbolTable.getClassName().equals(name)) {
                 reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col, "Error: variable " + name + " not declared"));
             }
             if(symbolTable.getImports().contains(name)){
@@ -124,7 +124,7 @@ public class IdentifierDeclarationVisitor extends AJmmVisitor<Object, Type> {
                     return field.getType();
                 }
             }
-            if((symbolTable.getImports() == null || !symbolTable.getImports().contains(name)) && (symbolTable.getSuper() == null || !symbolTable.getSuper().equals(name)) && !symbolTable.getClassName().equals(name)) {
+            if((symbolTable.getImports() == null || !symbolTable.getImports().contains(name)) && (symbolTable.getSuper().equals("") || !symbolTable.getSuper().equals(name)) && !symbolTable.getClassName().equals(name)) {
                 reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col, "Error: invalid type"));
             }
             else{
@@ -139,7 +139,7 @@ public class IdentifierDeclarationVisitor extends AJmmVisitor<Object, Type> {
 
     private Type dealNext(JmmNode jmmNode, Object dummy) {
         for (JmmNode child : jmmNode.getChildren()) {
-            visit(child);
+            this.visit(child, 0);
         }
         return new Type("", false);
     }

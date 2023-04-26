@@ -30,6 +30,7 @@ public class SimpleAnalysis implements JmmAnalysis {
         semanticAnalysers.add(new ExpressionAnalyser(symbolTable, jmmParserResult));
         semanticAnalysers.add(new IdentifierDeclarationAnalyser(symbolTable, jmmParserResult));
         semanticAnalysers.add(new MethodAnalyser(symbolTable, jmmParserResult));
+        semanticAnalysers.add(new MethodDeclarationAnalyser(symbolTable, jmmParserResult));
         semanticAnalysers.add(new OperationTypeAnalyser(symbolTable, jmmParserResult));
         semanticAnalysers.add(new VariableAnalyser(symbolTable, jmmParserResult));
 
