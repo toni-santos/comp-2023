@@ -112,7 +112,7 @@ public class ArrayVisitor extends AJmmVisitor<Object, Type> {
                 break;
         }
 
-        if (!type.getName().equals("int")) {
+        if (!type.getName().equals("int") || type.isArray()) {
             reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, 0, 0, "Array index must be an integer"));
         }
 
