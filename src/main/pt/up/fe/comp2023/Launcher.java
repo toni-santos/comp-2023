@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import pt.up.fe.comp.TestUtils;
+import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.parser.JmmParserResult;
 import pt.up.fe.specs.util.SpecsIo;
 import pt.up.fe.specs.util.SpecsLogs;
@@ -41,7 +42,10 @@ public class Launcher {
         TestUtils.noErrors(parserResult.getReports());
 
         // ... add remaining stages
-        SimpleSymbolTable simpleSymbolTable = new SimpleSymbolTable(parserResult.getRootNode());
+        SimpleAnalysis analysis = new SimpleAnalysis();
+        JmmSemanticsResult semanticsResult = analysis.semanticAnalysis(parserResult);
+
+        //TestUtils.noErrors(semanticsResult.getReports());
     }
 
     private static Map<String, String> parseArgs(String[] args) {

@@ -73,8 +73,6 @@ public class AssignmentVisitor extends AJmmVisitor<Object, Type> {
                 rhs = this.visit(jmmNode.getJmmChild(1));
                 break;
         }
-        //int line = Integer.valueOf(jmmNode.getJmmChild(0).get("line"));
-        //int col = Integer.valueOf(jmmNode.getJmmChild(0).get("col"));
         int line = 0;
         int col = 0;
 

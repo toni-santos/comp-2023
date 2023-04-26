@@ -37,13 +37,11 @@ public class ExpressionVisitor extends AJmmVisitor<Object, Type> {
 
     private Type dealWithThisExpression(JmmNode jmmNode, Object dummy) {
         JmmNode parentNode = jmmNode.getJmmParent();
-        //Integer line = Integer.valueOf(jmmNode.get("line"));
-        //Integer col = Integer.valueOf(jmmNode.get("col"));
-        while(!parentNode.getKind().equals("methodDeclaration") && !parentNode.getKind().equals("importDeclaration")) {
+        while(!parentNode.getKind().equals("MethodDeclaration") && !parentNode.getKind().equals("ImportDeclaration")) {
             if (parentNode.getJmmParent() == null) break;
             parentNode = parentNode.getJmmParent();
         }
-        if (parentNode.getKind().equals("methodDeclaration")) {
+        if (parentNode.getKind().equals("MethodDeclaration")) {
             if (parentNode.get("methodName").equals("main")) {
                 reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, 0, 0, "THIS keyword cannot be used in static method"));
             }

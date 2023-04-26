@@ -43,8 +43,6 @@ public class MethodVisitor extends AJmmVisitor<Object, Type> {
         catch (Exception e){
             type = null;
         }
-        //int line = Integer.valueOf(jmmNode.get("line"));
-        //int col = Integer.valueOf(jmmNode.get("col"));
         int line = 0;
         int col = 0;
 
@@ -106,8 +104,6 @@ public class MethodVisitor extends AJmmVisitor<Object, Type> {
                     argType = visit(jmmNode.getJmmChild(i), 0);
                     break;
             }
-            //int argLine = Integer.valueOf(jmmNode.getJmmChild(1).getJmmChild(i).get("line"));
-            //int argCol = Integer.valueOf(jmmNode.getJmmChild(1).getJmmChild(i).get("col"));
             List<Symbol> params = symbolTable.getParameters(jmmNode.get("value"));
             if(!params.get(i-1).getType().equals(argType)) {
                 reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col, "Error on method " + jmmNode.get("value") + ": invalid method call, types of parameters are invalid. Parameter " + params.get(i-1).getName() + " expected " + params.get(i-1).getType() + " but got " + argType));

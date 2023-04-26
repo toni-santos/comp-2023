@@ -104,12 +104,6 @@ public class OperationTypeVisitor extends AJmmVisitor<Object, Type> {
                 rhs = this.visit(jmmNode.getJmmChild(1));
                 break;
         }
-        /*
-        int lineLeft = Integer.valueOf(jmmNode.getJmmChild(0).get("line"));
-        int colLeft = Integer.valueOf(jmmNode.getJmmChild(0).get("col"));
-        int lineRight = Integer.valueOf(jmmNode.getJmmChild(1).get("line"));
-        int colRight = Integer.valueOf(jmmNode.getJmmChild(1).get("col"));
-         */
 
         int lineLeft = 0;
         int colLeft = 0;
@@ -182,8 +176,6 @@ public class OperationTypeVisitor extends AJmmVisitor<Object, Type> {
                 type = this.visit(jmmNode.getJmmChild(0));
                 break;
         }
-        //int line = Integer.valueOf(jmmNode.getJmmChild(1).get("line"));
-        //int col = Integer.valueOf(jmmNode.getJmmChild(1).get("col"));
         if (!type.getName().equals("boolean")) {
             reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, 0, 0, "This operation is only applicable to boolean values"));
         }

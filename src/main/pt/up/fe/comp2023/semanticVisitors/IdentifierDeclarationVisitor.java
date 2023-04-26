@@ -38,8 +38,6 @@ public class IdentifierDeclarationVisitor extends AJmmVisitor<Object, Type> {
     private Type dealWithId(JmmNode jmmNode, Object dummy) {
 
         String name = jmmNode.get("value");
-        //int line = Integer.valueOf(jmmNode.get("line"));
-        //int col = Integer.valueOf(jmmNode.get("col"));
         int line = 0;
         int col = 0;
         JmmNode parent = jmmNode.getJmmParent();
@@ -91,8 +89,6 @@ public class IdentifierDeclarationVisitor extends AJmmVisitor<Object, Type> {
         }
 
         String name = jmmNode.get("value");
-        //int line = Integer.valueOf(jmmNode.get("line"));
-        //int col = Integer.valueOf(jmmNode.get("col"));
         int line = 0;
         int col = 0;
         JmmNode parent = jmmNode.getJmmParent();
