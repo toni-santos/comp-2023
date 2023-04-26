@@ -117,7 +117,12 @@ public class MethodVisitor extends AJmmVisitor<Object, Type> {
     }
 
     private Type dealWithLength(JmmNode jmmNode, Object dummy) {
-
+        VariableVisitor variableVisitor = new VariableVisitor(symbolTable);
+        Type type = variableVisitor.visit(jmmNode.getJmmChild(0));
+        if(!type.isArray()) {
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, 0, 0, "Error in length method: " + jmmNode.getJmmChild(0).get("value") + " is not an array"));
+            return new Type("", false);
+        }
         return new Type("int", false);
     }
 
