@@ -76,7 +76,7 @@ public class ConditionalVisitor extends AJmmVisitor<Object, Boolean> {
                 break;
         }
         if (!type.getName().equals("boolean")) {
-            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, 0, 0, "If Statement: condition must be a boolean"));
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "If Statement: condition must be a boolean"));
         }
         return true;
     }
@@ -122,7 +122,7 @@ public class ConditionalVisitor extends AJmmVisitor<Object, Boolean> {
                 break;
         }
         if (!type.getName().equals("boolean")) {
-            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, 0, 0, "While Statement: condition must be a boolean"));
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "While Statement: condition must be a boolean"));
         }
 
         return true;

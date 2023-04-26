@@ -85,7 +85,7 @@ public class VariableVisitor extends AJmmVisitor<Object, Type>{
         }
 
         if (!type.getName().equals("int") || type.isArray()) {
-            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, 0, 0, "Array index must be an integer"));
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "Array index must be an integer"));
         }
         return new Type("array", true);
     }

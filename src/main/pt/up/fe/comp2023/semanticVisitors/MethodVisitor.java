@@ -43,8 +43,6 @@ public class MethodVisitor extends AJmmVisitor<Object, Type> {
         catch (Exception e){
             type = null;
         }
-        int line = 0;
-        int col = 0;
 
 
         if (type == null && !symbolTable.getSuper().equals("") || type == null && !symbolTable.getImports().isEmpty()) {
@@ -60,11 +58,18 @@ public class MethodVisitor extends AJmmVisitor<Object, Type> {
             }
             return type;
         } else if (type == null && jmmNode.getJmmChild(0).getKind().equals("This")) {
-            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col, "Error on method " + jmmNode.get("value") + ": Method Undeclared"));
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "Error on method " + jmmNode.get("value") + ": Method Undeclared"));
             return new Type("", false);
         } else if (type == null && symbolTable.getSuper().equals("") && symbolTable.getImports().isEmpty()) {
-            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col, "Error on method " + jmmNode.get("value") + ": Method Undeclared"));
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "Error on method " + jmmNode.get("value") + ": Method Undeclared"));
             return new Type("", false);
+        }
+
+        List<Symbol> params = symbolTable.getParameters(jmmNode.get("value"));
+
+        if (params.size() != (jmmNode.getChildren().size() - 1)){
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "Error on method " + jmmNode.get("value") + ": invalid method call, number of parameters not matching method definition."));
+            return type != null ? type: new Type("", false);
         }
 
         for(int i = 1; i < jmmNode.getChildren().size(); i++){
@@ -104,9 +109,9 @@ public class MethodVisitor extends AJmmVisitor<Object, Type> {
                     argType = visit(jmmNode.getJmmChild(i), 0);
                     break;
             }
-            List<Symbol> params = symbolTable.getParameters(jmmNode.get("value"));
+
             if(!params.get(i-1).getType().equals(argType)) {
-                reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col, "Error on method " + jmmNode.get("value") + ": invalid method call, types of parameters are invalid. Parameter " + params.get(i-1).getName() + " expected " + params.get(i-1).getType() + " but got " + argType));
+                reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "Error on method " + jmmNode.get("value") + ": invalid method call, types of parameters are invalid. Parameter " + params.get(i-1).getName() + " expected " + params.get(i-1).getType() + " but got " + argType));
             }
         }
         return type != null ? type: new Type("", false);
@@ -116,7 +121,7 @@ public class MethodVisitor extends AJmmVisitor<Object, Type> {
         VariableVisitor variableVisitor = new VariableVisitor(symbolTable);
         Type type = variableVisitor.visit(jmmNode.getJmmChild(0));
         if(!type.isArray()) {
-            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, 0, 0, "Error in length method: " + jmmNode.getJmmChild(0).get("value") + " is not an array"));
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "Error in length method: " + jmmNode.getJmmChild(0).get("value") + " is not an array"));
             return new Type("", false);
         }
         return new Type("int", false);

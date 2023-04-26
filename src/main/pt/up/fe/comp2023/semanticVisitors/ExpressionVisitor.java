@@ -43,7 +43,7 @@ public class ExpressionVisitor extends AJmmVisitor<Object, Type> {
         }
         if (parentNode.getKind().equals("MethodDeclaration")) {
             if (parentNode.get("methodName").equals("main")) {
-                reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, 0, 0, "THIS keyword cannot be used in static method"));
+                reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "THIS keyword cannot be used in static method"));
             }
         }
         return new Type(this.symbolTable.getClassName(), false);

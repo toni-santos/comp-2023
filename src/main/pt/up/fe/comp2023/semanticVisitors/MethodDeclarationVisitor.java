@@ -71,8 +71,6 @@ public class MethodDeclarationVisitor extends AJmmVisitor<Object, Type>  {
                     break;
             }
 
-            int line = 0;
-            int col = 0;
             if(type != null && !type.isArray()) {
                 if(!type.getName().equals(jmmNode.getJmmChild(0).get("value"))) {
                     if(jmmNode.getJmmChild(numOfChildren).getJmmChild(0).getKind().equals("MethodCall")) {
@@ -111,11 +109,11 @@ public class MethodDeclarationVisitor extends AJmmVisitor<Object, Type>  {
                                 break;
                         }
                         if(!symbolTable.getImports().contains(callerType.getName())) {
-                            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col, "Error: invalid return type on method " + jmmNode.get("methodName") + " method not declared or imported"));
+                            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "Error: invalid return type on method " + jmmNode.get("methodName") + " method not declared or imported"));
                         }
                     }
                     else {
-                        reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col, "Error: invalid return type on method " + jmmNode.get("methodName") + ". Expected " + jmmNode.getJmmChild(0).get("value") + " but got " + type.getName()));
+                        reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "Error: invalid return type on method " + jmmNode.get("methodName") + ". Expected " + jmmNode.getJmmChild(0).get("value") + " but got " + type.getName()));
                     }
                 }
             }

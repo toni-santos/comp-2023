@@ -73,7 +73,7 @@ public class ArrayVisitor extends AJmmVisitor<Object, Type> {
         }
 
         if (!type1.isArray()) {
-            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, 0, 0, "Array access on invalid type"));
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "Array access on invalid type"));
         }
 
 
@@ -113,7 +113,7 @@ public class ArrayVisitor extends AJmmVisitor<Object, Type> {
         }
 
         if (!type.getName().equals("int") || type.isArray()) {
-            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, 0, 0, "Array index must be an integer"));
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "Array index must be an integer"));
         }
 
 

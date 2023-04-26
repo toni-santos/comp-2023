@@ -38,8 +38,6 @@ public class IdentifierDeclarationVisitor extends AJmmVisitor<Object, Type> {
     private Type dealWithId(JmmNode jmmNode, Object dummy) {
 
         String name = jmmNode.get("value");
-        int line = 0;
-        int col = 0;
         JmmNode parent = jmmNode.getJmmParent();
         while(!parent.getKind().equals("MethodDeclaration") && !parent.getKind().equals("ImportDeclaration")) {
             parent = parent.getJmmParent();
@@ -63,14 +61,14 @@ public class IdentifierDeclarationVisitor extends AJmmVisitor<Object, Type> {
             for(Symbol field : fields) {
                 if(field.getName().equals(name)) {
                     if (method.equals("main")) {
-                        reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col,
+                        reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")),
                                 "Variable " + name + " is a field and cannot be used in main method"));
                     }
                     return field.getType();
                 }
             }
             if((symbolTable.getImports() == null || !symbolTable.getImports().contains(name)) && (symbolTable.getSuper().equals("") || !symbolTable.getSuper().equals(name)) && !symbolTable.getClassName().equals(name)) {
-                reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col, "Error: variable " + name + " not declared"));
+                reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "Error: variable " + name + " not declared"));
             }
             if(symbolTable.getImports().contains(name)){
                 return new Type(name, false);
@@ -89,8 +87,6 @@ public class IdentifierDeclarationVisitor extends AJmmVisitor<Object, Type> {
         }
 
         String name = jmmNode.get("value");
-        int line = 0;
-        int col = 0;
         JmmNode parent = jmmNode.getJmmParent();
         while(!parent.getKind().equals("MethodDeclaration") && !parent.getKind().equals("ImportDeclaration")) {
             parent = parent.getJmmParent();
@@ -114,14 +110,14 @@ public class IdentifierDeclarationVisitor extends AJmmVisitor<Object, Type> {
             for(Symbol field : fields) {
                 if(field.getName().equals(name)) {
                     if (method.equals("main")) {
-                        reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col,
+                        reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")),
                                 "Variable " + name + " is a field and cannot be used in main method"));
                     }
                     return field.getType();
                 }
             }
             if((symbolTable.getImports() == null || !symbolTable.getImports().contains(name)) && (symbolTable.getSuper().equals("") || !symbolTable.getSuper().equals(name)) && !symbolTable.getClassName().equals(name)) {
-                reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, line, col, "Error: invalid type"));
+                reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "Error: invalid type"));
             }
             else{
                 return new Type(name, false);

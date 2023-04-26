@@ -105,22 +105,17 @@ public class OperationTypeVisitor extends AJmmVisitor<Object, Type> {
                 break;
         }
 
-        int lineLeft = 0;
-        int colLeft = 0;
-        int lineRight = 0;
-        int colRight = 0;
-
         if(!lhs.getName().equals(rhs.getName())){
-            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, lineRight, colRight, "Error in operation " + op + " : operands have different types"));
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.getJmmChild(1).get("lineStart")), Integer.parseInt(jmmNode.getJmmChild(1).get("colStart")), "Error in operation " + op + " : operands have different types"));
         }
         else if( ( lhs.isArray() || rhs.isArray() ) && ( op.equals("+") || op.equals("-") || op.equals("*") || op.equals("/") || op.equals("<") ) ) {
-            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, lineLeft, colLeft, "Error in operation " + op + " : array cannot be used in this operation"));
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.getJmmChild(0).get("lineStart")), Integer.parseInt(jmmNode.getJmmChild(0).get("colStart")), "Error in operation " + op + " : array cannot be used in this operation"));
         }
         else if(!lhs.getName().equals("int") && ( op.equals("+") || op.equals("-") || op.equals("*") || op.equals("/") || op.equals("<") ) ) {
-            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, lineLeft, colLeft, "Error in operation " + op + " : operands have invalid types for this operation. " + op + " expects operands of type integer"));
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.getJmmChild(0).get("lineStart")), Integer.parseInt(jmmNode.getJmmChild(0).get("colStart")), "Error in operation " + op + " : operands have invalid types for this operation. " + op + " expects operands of type integer"));
         }
         else if(!lhs.getName().equals("boolean") && ( op.equals("&&") )) {
-            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, lineLeft, lineLeft, "Error in operation "+ op + " : operands have invalid types for this operation. " + op + " expects operands of type boolean"));
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.getJmmChild(0).get("lineStart")), Integer.parseInt(jmmNode.getJmmChild(0).get("colStart")), "Error in operation "+ op + " : operands have invalid types for this operation. " + op + " expects operands of type boolean"));
         }
         else {
             switch(op) {
@@ -177,7 +172,7 @@ public class OperationTypeVisitor extends AJmmVisitor<Object, Type> {
                 break;
         }
         if (!type.getName().equals("boolean")) {
-            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, 0, 0, "This operation is only applicable to boolean values"));
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "This operation is only applicable to boolean values"));
         }
         return new Type("boolean", false);
     }
