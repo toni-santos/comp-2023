@@ -119,6 +119,9 @@ public class ConditionalVisitor extends AJmmVisitor<Object, Boolean> {
                 VariableVisitor variableVisitor = new VariableVisitor(symbolTable);
                 type = variableVisitor.visit(jmmNode.getJmmChild(0), 0);
                 break;
+            default:
+                this.visit(jmmNode.getJmmChild(0));
+                break;
         }
         //int line = Integer.valueOf(jmmNode.getJmmChild(0).get("line"));
         //int col = Integer.valueOf(jmmNode.getJmmChild(0).get("col"));

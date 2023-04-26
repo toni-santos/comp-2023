@@ -70,7 +70,7 @@ public class AssignmentVisitor extends AJmmVisitor<Object, Type> {
                 rhs = arrayVisitor.visit(jmmNode.getJmmChild(1), 0);
                 break;
             default:
-                rhs = visit(jmmNode.getJmmChild(1));
+                rhs = this.visit(jmmNode.getJmmChild(1));
                 break;
         }
         //int line = Integer.valueOf(jmmNode.getJmmChild(0).get("line"));

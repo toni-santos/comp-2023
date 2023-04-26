@@ -92,8 +92,7 @@ public class MethodVisitor extends AJmmVisitor<Object, Type> {
                     break;
                 case "Length":
                 case "MethodCall":
-                    MethodVisitor methodVisitor = new MethodVisitor(symbolTable);
-                    argType = methodVisitor.visit(jmmNode.getJmmChild(i), 0);
+                    argType = this.visit(jmmNode.getJmmChild(i), 0);
                     break;
                 case "BinaryOp":
                 case "UnaryOp":
@@ -101,7 +100,8 @@ public class MethodVisitor extends AJmmVisitor<Object, Type> {
                     argType = opVisitor.visit(jmmNode.getJmmChild(i), 0);
                     break;
                 case "ArraySubscript":
-                    argType = this.visit(jmmNode.getJmmChild(i), 0);
+                    ArrayVisitor arrayVisitor = new ArrayVisitor(symbolTable);
+                    argType = arrayVisitor.visit(jmmNode.getJmmChild(i), 0);
                     break;
                 default:
                     argType = visit(jmmNode.getJmmChild(i), 0);
@@ -153,8 +153,7 @@ public class MethodVisitor extends AJmmVisitor<Object, Type> {
                     break;
                 case "LengthMethod":
                 case "MethodCall":
-                    MethodVisitor methodVisitor = new MethodVisitor(symbolTable);
-                    type = methodVisitor.visit(jmmNode.getJmmChild(numOfChildren).getJmmChild(0), 0);
+                    type = this.visit(jmmNode.getJmmChild(numOfChildren).getJmmChild(0), 0);
                     break;
                 case "IntValue":
                 case "NewObject":
@@ -193,8 +192,7 @@ public class MethodVisitor extends AJmmVisitor<Object, Type> {
                                 break;
                             case "LengthMethod":
                             case "MethodCall":
-                                MethodVisitor methodVisitor = new MethodVisitor(symbolTable);
-                                callerType = methodVisitor.visit(jmmNode.getJmmChild(numOfChildren).getJmmChild(0).getJmmChild(0), 0);
+                                callerType = this.visit(jmmNode.getJmmChild(numOfChildren).getJmmChild(0).getJmmChild(0), 0);
                                 break;
                             case "IntValue":
                             case "NewObject":
