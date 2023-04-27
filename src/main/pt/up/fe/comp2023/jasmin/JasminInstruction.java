@@ -97,7 +97,7 @@ public class JasminInstruction {
         }
         String argumentTypes = getInvokeArguments(invoke, operandList);
         invokeCode = "\t" + invokeType.toString() + " " + className + "/" + methodName + "(" + argumentTypes + ")" + 
-                returnType + "\n";
+                returnType;
         invoke.append(invokeCode);
         return invoke.toString();
     }
