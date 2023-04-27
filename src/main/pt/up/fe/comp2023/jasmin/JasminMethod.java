@@ -78,7 +78,7 @@ public class JasminMethod {
         inst.append(jasminInstruction.getInstruction(instruction)).append("\n");
         if (instruction.getInstType() == InstructionType.CALL) {
             ElementType returnType = ((CallInstruction) instruction).getReturnType().getTypeOfElement();
-            if (returnType != ElementType.VOID) {
+            if (returnType != ElementType.VOID || ((CallInstruction) instruction).getInvocationType() == CallType.invokespecial) {
                 inst.append("\tpop\n");
             }
         }
