@@ -57,7 +57,7 @@ public class MethodDeclarationVisitor extends AJmmVisitor<Object, Type>  {
                     OperationTypeVisitor opVisitor = new OperationTypeVisitor(symbolTable);
                     type = opVisitor.visit(jmmNode.getJmmChild(numOfChildren).getJmmChild(0), 0);
                     break;
-                case "LengthMethod":
+                case "Length":
                 case "MethodCall":
                     MethodVisitor methodVisitor = new MethodVisitor(symbolTable);
                     type = methodVisitor.visit(jmmNode.getJmmChild(numOfChildren).getJmmChild(0), 0);
@@ -109,6 +109,9 @@ public class MethodDeclarationVisitor extends AJmmVisitor<Object, Type>  {
                                 VariableVisitor variableVisitor = new VariableVisitor(symbolTable);
                                 callerType = variableVisitor.visit(jmmNode.getJmmChild(numOfChildren).getJmmChild(0).getJmmChild(0), 0);
                                 break;
+                        }
+                        if ((callerType.getName().equals(this.symbolTable.getClassName()) && !this.symbolTable.getSuper().equals("")) || (callerType.getName().equals(this.symbolTable.getSuper()) && !this.symbolTable.getSuper().equals(""))){
+                            return new Type("", false);
                         }
                         if(!symbolTable.getImports().contains(callerType.getName())) {
                             reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "Error: invalid return type on method " + jmmNode.get("methodName") + " method not declared or imported"));

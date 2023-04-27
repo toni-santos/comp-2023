@@ -145,6 +145,7 @@ public class OperationTypeVisitor extends AJmmVisitor<Object, Type> {
                 AssignmentVisitor assignmentVisitor = new AssignmentVisitor(symbolTable);
                 type = assignmentVisitor.visit(jmmNode.getJmmChild(0), 0);
                 break;
+            case "This":
             case "Parenthesis":
                 ExpressionVisitor expressionVisitor = new ExpressionVisitor(symbolTable);
                 type = expressionVisitor.visit(jmmNode.getJmmChild(0), 0);

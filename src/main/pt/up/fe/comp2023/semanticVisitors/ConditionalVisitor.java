@@ -113,7 +113,7 @@ public class ConditionalVisitor extends AJmmVisitor<Object, Boolean> {
                 OperationTypeVisitor opVisitor = new OperationTypeVisitor(symbolTable);
                 type = opVisitor.visit(jmmNode.getJmmChild(0), 0);
                 break;
-            case "LengthMethod":
+            case "Length":
             case "MethodCall":
                 MethodVisitor methodVisitor = new MethodVisitor(symbolTable);
                 type = methodVisitor.visit(jmmNode.getJmmChild(0), 0);
