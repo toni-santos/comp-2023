@@ -79,6 +79,9 @@ public class ConditionalVisitor extends AJmmVisitor<Object, Boolean> {
         if (!type.getName().equals("boolean")) {
             reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "If Statement: condition must be a boolean"));
         }
+        else if(type.isArray()) {
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "While Statement: condition cannot be an array"));
+        }
 
         this.visit(jmmNode.getJmmChild(1), 0);
         this.visit(jmmNode.getJmmChild(2), 0);
@@ -129,6 +132,9 @@ public class ConditionalVisitor extends AJmmVisitor<Object, Boolean> {
         }
         if (!type.getName().equals("boolean")) {
             reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "While Statement: condition must be a boolean"));
+        }
+        else if(type.isArray()) {
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "While Statement: condition cannot be an array"));
         }
 
         this.visit(jmmNode.getJmmChild(1), 0);

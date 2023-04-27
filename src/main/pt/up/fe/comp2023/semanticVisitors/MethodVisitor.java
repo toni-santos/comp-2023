@@ -58,6 +58,10 @@ public class MethodVisitor extends AJmmVisitor<Object, Type> {
 
         if (type == null && !symbolTable.getSuper().equals("") || type == null && !symbolTable.getImports().isEmpty()) {
             switch (jmmNode.getJmmParent().getKind()) {
+                case "While":
+                case "IfElse":
+                    type = new Type("boolean", false);
+                    break;
                 case "DeclarationStatement":
                     JmmNode child = jmmNode.getJmmParent().getJmmChild(0);
                     IdentifierDeclarationVisitor typeVisitor = new IdentifierDeclarationVisitor(symbolTable);
