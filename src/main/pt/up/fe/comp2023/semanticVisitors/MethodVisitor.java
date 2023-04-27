@@ -44,8 +44,17 @@ public class MethodVisitor extends AJmmVisitor<Object, Type> {
             type = null;
         }
 
-
-        if (type == null && !symbolTable.getSuper().equals("") || type == null && !symbolTable.getImports().isEmpty()) {
+        if (type == null && jmmNode.getJmmChild(0).getKind().equals("This") && symbolTable.getSuper().equals("")){
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "Error on method " + jmmNode.get("value") + ": Method Undeclared"));
+            return new Type("", false);
+        } else if (type == null && jmmNode.getJmmChild(0).getKind().equals("Identifier")){
+            VariableVisitor variableVisitor = new VariableVisitor(this.symbolTable);
+            Type callerType = variableVisitor.visit(jmmNode.getJmmChild(0), 0);
+            if (callerType.getName().equals(this.symbolTable.getClassName()) && symbolTable.getSuper().equals("")){
+                reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "Error on method " + jmmNode.get("value") + ": Method Undeclared"));
+            }
+            return new Type("", false);
+        } else if (type == null && !symbolTable.getSuper().equals("") || type == null && !symbolTable.getImports().isEmpty()) {
             switch (jmmNode.getJmmParent().getKind()) {
                 case "DeclarationStatement":
                     JmmNode child = jmmNode.getJmmParent().getJmmChild(0);
@@ -57,9 +66,6 @@ public class MethodVisitor extends AJmmVisitor<Object, Type> {
                     break;
             }
             return type;
-        } else if (type == null && jmmNode.getJmmChild(0).getKind().equals("This")) {
-            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "Error on method " + jmmNode.get("value") + ": Method Undeclared"));
-            return new Type("", false);
         } else if (type == null && symbolTable.getSuper().equals("") && symbolTable.getImports().isEmpty()) {
             reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "Error on method " + jmmNode.get("value") + ": Method Undeclared"));
             return new Type("", false);

@@ -1,8 +1,8 @@
 import B;
 
-class A{
+class A extends B{
 
-    A aaa;
+    B aaa;
 
     public static void main(String[] args){
         int[] b;
@@ -13,6 +13,7 @@ class A{
 
     int a(){
         aaa = this;
+        aaa.aaaaaaa();
         return 0;
     }
 
