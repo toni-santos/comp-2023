@@ -3,21 +3,15 @@ import W;
 
 class A extends B{
 
-    W aaa;
+    B aaa;
 
     public static void main(String[] args){
-        int[] b;
-        int[] c;
-        B bbb;
-        int toni;
-        //b[1] = toni;
-        toni = bbb.www();
+        int b;
+        boolean d;
+        while(d){
+          while(b){
+          }
+        }
     }
-/*
-    int a(){
-        aaa = this.www();
-        aaa.a();
-        return 0;
-    }*/
 
 }
