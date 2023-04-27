@@ -88,8 +88,18 @@ public class IdentifierDeclarationVisitor extends AJmmVisitor<Object, Type> {
 
         String name = jmmNode.get("value");
         JmmNode parent = jmmNode.getJmmParent();
-        while(!parent.getKind().equals("MethodDeclaration") && !parent.getKind().equals("ImportDeclaration")) {
+        while(!parent.getKind().equals("MethodDeclaration") && !parent.getKind().equals("ImportDeclaration") && !parent.getKind().equals("Class")) {
             parent = parent.getJmmParent();
+        }
+
+        if (parent.getKind().equals("Class")){
+            if((symbolTable.getImports() == null || !symbolTable.getImports().contains(name)) && (symbolTable.getSuper().equals("") || !symbolTable.getSuper().equals(name)) && !symbolTable.getClassName().equals(name)) {
+                reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "Error: invalid type"));
+                return new Type(name, false);
+            }
+            else{
+                return new Type(name, false);
+            }
         }
 
         if(!parent.getKind().equals("ImportDeclaration")) {

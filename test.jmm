@@ -1,11 +1,19 @@
 import B;
 
 class A{
+
+    A aaa;
+
     public static void main(String[] args){
         int[] b;
         int[] c;
         int toni;
         b[1] = toni;
+    }
+
+    int a(){
+        aaa = this;
+        return 0;
     }
 
 }
