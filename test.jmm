@@ -1,20 +1,23 @@
 import B;
 
-class A extends AAA{
+class A{
     public static void main(String[] args){
         int[] b;
+        int[] c;
         A a;
         b = new int[2];
-        a = a.foo(b, a);
+        c = new int[1];
+        a = a.foo(b);
     }
 
     A foo(int[] aa){
         A a;
         int toino;
         a = new A();
+        //a.aaaaaaaaaaaaaaaaaaaa();
+        toino = aa;
 
-
-        if (!true){ toino = 0;} else toino = 0;
+        while (true){ toino = 0;}
 
         return a;
     }

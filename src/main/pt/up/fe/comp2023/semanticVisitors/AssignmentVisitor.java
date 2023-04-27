@@ -77,6 +77,8 @@ public class AssignmentVisitor extends AJmmVisitor<Object, Type> {
         if (lhs.isArray() && !rhs.isArray() && !jmmNode.getJmmChild(1).getKind().equals("NewArray"))
         {
             reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "Arrays can only be assigned array values"));
+        } else if (!lhs.isArray() && rhs.isArray()){
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "Not able to assign array value to non-array"));
         }
 
         if(!lhs.getName().equals(rhs.getName()) &&
@@ -85,7 +87,7 @@ public class AssignmentVisitor extends AJmmVisitor<Object, Type> {
                 !(lhs.getName().equals("int") && lhs.isArray() && rhs.getName().equals("array"))
         )
         {
-            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC,Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "Error in attribuition: imcompatible types -> " + lhs.getName() + " : " + rhs.getName()));
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC,Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "Error in assignment: imcompatible types -> " + lhs.getName() + " : " + rhs.getName()));
         }
         return new Type(lhs.getName(), lhs.isArray());
     }
