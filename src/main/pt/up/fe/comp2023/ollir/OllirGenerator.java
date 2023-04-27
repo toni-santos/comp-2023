@@ -328,7 +328,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
             }
         }
 
-        if (isClassField) {
+        if (isClassField && !(this.methodFieldsMap.containsKey(variableName) || this.methodParamsMap.containsKey(variableName))) {
             String child = visit(jmmNode.getJmmChild(1), new OllirTemp(type, true));
 
             code.append(getIndent()).append("putfield(this, ").append(variableString).append(", ").append(child).append(").V").append(";\n");
@@ -474,16 +474,16 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         boolean isMethodField = this.methodFieldsMap.containsKey(variable);
         boolean isImport = this.symbolTable.getImports().contains(variable);
 
-        if ((isMethodParam && isClassField) || (isClassField && isMethodField) || (isMethodParam && isMethodField) || (isImport && isClassField) || (isImport && isMethodParam) || (isImport && isMethodField)) {
+        /*if ((isMethodParam && isClassField) || (isClassField && isMethodField) || (isMethodParam && isMethodField) || (isImport && isClassField) || (isImport && isMethodParam) || (isImport && isMethodField)) {
             return null;
-        }
+        }*/
 
-        if (isClassField) {
-            return this.classFieldsMap.get(variable);
+        if (isMethodField) {
+            return this.methodFieldsMap.get(variable);
         } else if (isMethodParam) {
             return this.methodParamsMap.get(variable);
-        } else if (isMethodField) {
-            return this.methodFieldsMap.get(variable);
+        } else if (isClassField) {
+            return this.classFieldsMap.get(variable);
         } else if (isImport) {
             return this.symbolTable.getImports().stream().filter(importStr -> importStr.equals(variable)).collect(Collectors.joining());
         } else {
@@ -505,7 +505,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
 
     private String toOllirType(Type type) {
         StringBuilder result = new StringBuilder();
-        if (type.isArray() || type.getName().equals("String")) {
+        if (type.isArray()) {
             result.append(".array");
         }
 
