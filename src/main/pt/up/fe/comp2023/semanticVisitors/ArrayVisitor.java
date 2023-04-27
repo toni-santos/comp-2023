@@ -41,6 +41,7 @@ public class ArrayVisitor extends AJmmVisitor<Object, Type> {
         // check if array access is done over array
 
         switch(jmmNode.getJmmChild(0).getKind()) {
+            case "ArrayStatement":
             case "DeclarationStatement":
                 AssignmentVisitor assignmentVisitor = new AssignmentVisitor(symbolTable);
                 type1 = assignmentVisitor.visit(jmmNode.getJmmChild(0), 0);
@@ -81,6 +82,7 @@ public class ArrayVisitor extends AJmmVisitor<Object, Type> {
         // check if index is integer
 
         switch(jmmNode.getJmmChild(1).getKind()) {
+            case "ArrayStatement":
             case "DeclarationStatement":
                 AssignmentVisitor assignmentVisitor = new AssignmentVisitor(symbolTable);
                 type = assignmentVisitor.visit(jmmNode.getJmmChild(1), 0);

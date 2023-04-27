@@ -38,6 +38,7 @@ public class MethodDeclarationVisitor extends AJmmVisitor<Object, Type>  {
             Type type = new Type("", false);
 
             switch(jmmNode.getJmmChild(numOfChildren).getJmmChild(0).getKind()) {
+                case "ArrayStatement":
                 case "DeclarationStatement":
                     AssignmentVisitor assignmentVisitor = new AssignmentVisitor(symbolTable);
                     type = assignmentVisitor.visit(jmmNode.getJmmChild(numOfChildren).getJmmChild(0), 0);
@@ -76,6 +77,7 @@ public class MethodDeclarationVisitor extends AJmmVisitor<Object, Type>  {
                     if(jmmNode.getJmmChild(numOfChildren).getJmmChild(0).getKind().equals("MethodCall")) {
                         Type callerType = new Type("", false);
                         switch(jmmNode.getJmmChild(numOfChildren).getJmmChild(0).getJmmChild(0).getKind()) {
+                            case "ArrayStatement":
                             case "DeclarationStatement":
                                 AssignmentVisitor assignmentVisitor = new AssignmentVisitor(symbolTable);
                                 callerType = assignmentVisitor.visit(jmmNode.getJmmChild(numOfChildren).getJmmChild(0).getJmmChild(0), 0);

@@ -4,21 +4,8 @@ class A{
     public static void main(String[] args){
         int[] b;
         int[] c;
-        A a;
-        b = new int[2];
-        c = new int[1];
-        a = a.foo(b);
+        int toni;
+        b[1] = toni;
     }
 
-    A foo(int[] aa){
-        A a;
-        int toino;
-        a = new A();
-        //a.aaaaaaaaaaaaaaaaaaaa();
-        toino = aa;
-
-        while (true){ toino = 0;}
-
-        return a;
-    }
 }

@@ -42,6 +42,7 @@ public class OperationTypeVisitor extends AJmmVisitor<Object, Type> {
         Type rhs = new Type("", false);
 
         switch(jmmNode.getJmmChild(0).getKind()) {
+            case "ArrayStatement":
             case "DeclarationStatement":
                 AssignmentVisitor assignmentVisitor = new AssignmentVisitor(symbolTable);
                 lhs = assignmentVisitor.visit(jmmNode.getJmmChild(0), 0);
@@ -73,6 +74,7 @@ public class OperationTypeVisitor extends AJmmVisitor<Object, Type> {
         }
 
         switch(jmmNode.getJmmChild(1).getKind()) {
+            case "ArrayStatement":
             case "DeclarationStatement":
                 AssignmentVisitor assignmentVisitor = new AssignmentVisitor(symbolTable);
                 rhs = assignmentVisitor.visit(jmmNode.getJmmChild(1), 0);
@@ -138,6 +140,7 @@ public class OperationTypeVisitor extends AJmmVisitor<Object, Type> {
         Type type = new Type("", false);
 
         switch(jmmNode.getJmmChild(0).getKind()) {
+            case "ArrayStatement":
             case "DeclarationStatement":
                 AssignmentVisitor assignmentVisitor = new AssignmentVisitor(symbolTable);
                 type = assignmentVisitor.visit(jmmNode.getJmmChild(0), 0);

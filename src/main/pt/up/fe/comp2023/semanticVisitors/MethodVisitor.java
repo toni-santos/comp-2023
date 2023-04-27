@@ -76,6 +76,7 @@ public class MethodVisitor extends AJmmVisitor<Object, Type> {
             Type argType = new Type("", false);
 
             switch(jmmNode.getJmmChild(i).getKind()) {
+                case "ArrayStatement":
                 case "DeclarationStatement":
                     AssignmentVisitor assignmentVisitor = new AssignmentVisitor(symbolTable);
                     argType = assignmentVisitor.visit(jmmNode.getJmmChild(i), 0);

@@ -55,6 +55,7 @@ public class ExpressionVisitor extends AJmmVisitor<Object, Type> {
             expr = expr.getJmmChild(0);
         }
         switch(expr.getKind()) {
+            case "ArrayStatement":
             case "DeclarationStatement":
                 AssignmentVisitor assignmentVisitor = new AssignmentVisitor(symbolTable);
                 return assignmentVisitor.visit(expr, 0);

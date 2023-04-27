@@ -53,6 +53,7 @@ public class VariableVisitor extends AJmmVisitor<Object, Type>{
         Type type = new Type("", false);
 
         switch(jmmNode.getJmmChild(0).getKind()) {
+            case "ArrayStatement":
             case "DeclarationStatement":
                 AssignmentVisitor assignmentVisitor = new AssignmentVisitor(symbolTable);
                 type = assignmentVisitor.visit(jmmNode.getJmmChild(0), 0);
