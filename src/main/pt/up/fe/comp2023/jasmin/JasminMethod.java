@@ -61,6 +61,7 @@ public class JasminMethod {
         for (Instruction instruction : instructions) {
             body.append(getInstructionWithLabels(instruction));
         }
+        if (instructions.get(instructions.size() - 1).getInstType() != InstructionType.RETURN) body.append("\n\treturn\n");
         return body.toString();
     }
 
@@ -82,6 +83,7 @@ public class JasminMethod {
                 inst.append("\tpop\n");
             }
         }
+
         return inst.toString();
     }
 
