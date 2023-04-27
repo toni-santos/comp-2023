@@ -52,14 +52,16 @@ public class MethodVisitor extends AJmmVisitor<Object, Type> {
             Type callerType = variableVisitor.visit(jmmNode.getJmmChild(0), 0);
             if (callerType.getName().equals(this.symbolTable.getClassName()) && symbolTable.getSuper().equals("")){
                 reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(jmmNode.get("lineStart")), Integer.parseInt(jmmNode.get("colStart")), "Error on method " + jmmNode.get("value") + ": Method Undeclared"));
+                return new Type("", false);
             }
-            return new Type("", false);
-        } else if (type == null && !symbolTable.getSuper().equals("") || type == null && !symbolTable.getImports().isEmpty()) {
+        }
+
+        if (type == null && !symbolTable.getSuper().equals("") || type == null && !symbolTable.getImports().isEmpty()) {
             switch (jmmNode.getJmmParent().getKind()) {
                 case "DeclarationStatement":
                     JmmNode child = jmmNode.getJmmParent().getJmmChild(0);
-                    VariableVisitor variableVisitor = new VariableVisitor(symbolTable);
-                    type = variableVisitor.visit(child);
+                    IdentifierDeclarationVisitor typeVisitor = new IdentifierDeclarationVisitor(symbolTable);
+                    type = typeVisitor.visit(child);
                     break;
                 default:
                     type = this.visit(jmmNode.getJmmChild(0));

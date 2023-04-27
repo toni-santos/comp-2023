@@ -1,20 +1,23 @@
 import B;
+import W;
 
 class A extends B{
 
-    B aaa;
+    W aaa;
 
     public static void main(String[] args){
         int[] b;
         int[] c;
+        B bbb;
         int toni;
-        b[1] = toni;
+        //b[1] = toni;
+        toni = bbb.www();
     }
-
+/*
     int a(){
-        aaa = this;
-        aaa.aaaaaaa();
+        aaa = this.www();
+        aaa.a();
         return 0;
-    }
+    }*/
 
 }
