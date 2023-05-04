@@ -22,6 +22,8 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
     private HashMap<String, String> classFieldsMap = new HashMap<String, String>();
     private String methodReturn;
     private Integer auxNum = 0;
+    private Integer whileCount = 0;
+    private Integer ifElseCount = 0;
     private List<String> primitiveTypes = Arrays.asList(".bool", ".i32");
     private String methodName;
 
@@ -49,6 +51,11 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         addVisit("MethodCall", this::dealWithMethodCallExpression);
         addVisit("Length", this::dealWithLengthExpression);
         addVisit("ArraySubscript", this::dealWithArraySubscriptExpression);
+        addVisit("While", this::dealWithWhileStatement);
+        addVisit("IfElse", this::dealWithIfElseStatement);
+        /*
+        addVisit("NewArray", this::dealWithNewArray);
+         */
     }
 
     private String dealWithParenthesis(JmmNode jmmNode, OllirTemp temp) {
@@ -449,6 +456,48 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         return "";
     }
 
+    private String dealWithWhileStatement(JmmNode jmmNode, OllirTemp temp) {
+
+        String whileCondition = visit(jmmNode.getJmmChild(0), new OllirTemp());
+        String whileStatement = visit(jmmNode.getJmmChild(1), new OllirTemp());
+
+        code.append(getIndent()).append("goto while_cond_").append(getWhileCount()).append(";\n");
+        code.append(getIndent()).append("while_body_").append(getWhileCount()).append(":\n");
+        incrementIndent();
+        // while loop body
+        decrementIndent();
+        code.append(getIndent()).append("while_cond_").append(getWhileCount()).append(":\n");
+        incrementIndent();
+        // check condition (if expression goto while_body;)
+        decrementIndent();
+
+        incrementWhileCount();
+
+        return "";
+    }
+
+
+    private String dealWithIfElseStatement(JmmNode jmmNode, OllirTemp temp) {
+
+        String ifCondition = visit(jmmNode.getJmmChild(0), new OllirTemp());
+        String ifStatement = visit(jmmNode.getJmmChild(1), new OllirTemp());
+        String elseStatement = visit(jmmNode.getJmmChild(2), new OllirTemp());
+
+        // check condition (if expression goto if_then;)
+        // else body
+        code.append(getIndent()).append("goto if_end_").append(getIfElseCount()).append(";\n");
+        code.append(getIndent()).append("if_then_").append(getIfElseCount()).append(":\n");
+        incrementIndent();
+        // if then body
+        decrementIndent();
+        code.append(getIndent()).append("if_end_").append(getIfElseCount()).append(":\n");
+        incrementIndent();
+
+        incrementIfElseCount();
+
+        return "";
+    }
+
     private String dealNext(JmmNode jmmNode, OllirTemp temp) {
         for (JmmNode child : jmmNode.getChildren()) {
             visit(child, new OllirTemp());
@@ -502,6 +551,31 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
     private String getIndent() {
         return "\t".repeat(this.indent);
     }
+
+    private void decrementWhileCount() {
+        this.whileCount--;
+    }
+
+    private void incrementWhileCount() {
+        this.whileCount++;
+    }
+
+    private String getWhileCount(){
+        return this.whileCount.toString();
+    }
+
+    private void decrementIfElseCount() {
+        this.ifElseCount--;
+    }
+
+    private void incrementIfElseCount() {
+        this.ifElseCount++;
+    }
+
+    private String getIfElseCount(){
+        return this.ifElseCount.toString();
+    }
+
 
     private String toOllirType(Type type) {
         StringBuilder result = new StringBuilder();
