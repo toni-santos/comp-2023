@@ -437,7 +437,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
             classFieldsMap.put(field.getName(), field.getName() + toOllirType(field.getType()));
         }
 
-        // Defalut constructor
+        // Default constructor
         code.append("\n").append(getIndent()).append(".construct ").append(symbolTable.getClassName()).append("().V {\n");
         incrementIndent();
         code.append(getIndent()).append("invokespecial(this, \"<init>\").V;\n");
@@ -458,17 +458,21 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
 
     private String dealWithWhileStatement(JmmNode jmmNode, OllirTemp temp) {
 
-        String whileCondition = visit(jmmNode.getJmmChild(0), new OllirTemp());
-        String whileStatement = visit(jmmNode.getJmmChild(1), new OllirTemp());
+        String whileCondition = visit(jmmNode.getJmmChild(0), new OllirTemp()); // possibly move to temp variable
 
         code.append(getIndent()).append("goto while_cond_").append(getWhileCount()).append(";\n");
         code.append(getIndent()).append("while_body_").append(getWhileCount()).append(":\n");
-        incrementIndent();
+
         // while loop body
-        decrementIndent();
-        code.append(getIndent()).append("while_cond_").append(getWhileCount()).append(":\n");
         incrementIndent();
+        String whileStatement = visit(jmmNode.getJmmChild(1), new OllirTemp());
+        decrementIndent();
+
+        code.append(getIndent()).append("while_cond_").append(getWhileCount()).append(":\n");
+
         // check condition (if expression goto while_body;)
+        incrementIndent();
+        code.append(getIndent()).append("if(").append(whileCondition).append(") goto while_body").append(getWhileCount()).append(";\n");
         decrementIndent();
 
         incrementWhileCount();
@@ -479,17 +483,24 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
 
     private String dealWithIfElseStatement(JmmNode jmmNode, OllirTemp temp) {
 
-        String ifCondition = visit(jmmNode.getJmmChild(0), new OllirTemp());
-        String ifStatement = visit(jmmNode.getJmmChild(1), new OllirTemp());
-        String elseStatement = visit(jmmNode.getJmmChild(2), new OllirTemp());
+        String ifCondition = visit(jmmNode.getJmmChild(0), new OllirTemp()); // possibly move to temp variable
 
         // check condition (if expression goto if_then;)
+        code.append(getIndent()).append("if(").append(ifCondition).append(") goto if_then").append(getIfElseCount()).append(";\n");
+
         // else body
+        incrementIndent();
+        String elseStatement = visit(jmmNode.getJmmChild(2), new OllirTemp());
+        decrementIndent();
+
         code.append(getIndent()).append("goto if_end_").append(getIfElseCount()).append(";\n");
         code.append(getIndent()).append("if_then_").append(getIfElseCount()).append(":\n");
-        incrementIndent();
+
         // if then body
+        incrementIndent();
+        String ifStatement = visit(jmmNode.getJmmChild(1), new OllirTemp());
         decrementIndent();
+
         code.append(getIndent()).append("if_end_").append(getIfElseCount()).append(":\n");
         incrementIndent();
 
