@@ -17,6 +17,7 @@ public class JasminInstruction {
 
     public String getInstruction(Instruction instruction) {
         InstructionType instructionType = instruction.getInstType();
+        System.out.println("instructionType = " + instructionType);
         switch (instructionType) {
             case ASSIGN -> { return "\t" + dealWithAssign((AssignInstruction) instruction); }
             case CALL -> { return "\t" + dealWithCall((CallInstruction) instruction); }
@@ -27,6 +28,7 @@ public class JasminInstruction {
             case UNARYOPER -> { return "\t" + dealWithUnaryOp((UnaryOpInstruction) instruction); }
             case BINARYOPER -> { return "\t" + dealWithBinaryOp((BinaryOpInstruction) instruction); }
             case NOPER -> { return "\t" + dealWithNop((SingleOpInstruction) instruction); }
+            case BRANCH -> { return "\t" + dealWithBranch((CondBranchInstruction) instruction); }
             default -> throw new NotImplementedException(instructionType);
         }
     }
@@ -164,20 +166,61 @@ public class JasminInstruction {
     }
 
     private String dealWithUnaryOp(UnaryOpInstruction instruction) {
-        return "unaryoper";
+        StringBuilder unOp = new StringBuilder();
+        Element operand = instruction.getOperand();
+        Operation operation = instruction.getOperation();
+
+        if (operation.getOpType() == OperationType.NOTB) {
+            unOp.append(getLoadInst(1)).append("1\n").append(getLoad(operand)).append("\t").append("isub");
+        }
+        return unOp.toString();
     }
 
     private String dealWithBinaryOp(BinaryOpInstruction instruction) {
         StringBuilder binOp = new StringBuilder();
         Element lhs = instruction.getLeftOperand();
         Element rhs = instruction.getRightOperand();
-        binOp.append(getLoad(lhs)).append(getLoad(rhs)).append("\t")
-                .append(JasminUtils.getOp(instruction.getOperation())).append("\n");
+        OperationType type = instruction.getOperation().getOpType();
+        switch (type) {
+            case LTH -> {
+                return dealWithCmp(lhs, rhs, "lt", type.name());
+            }
+            case GTE -> {
+                return dealWithCmp(lhs, rhs, "ge", type.name());
+            }
+            default -> {
+                binOp.append(getLoad(lhs)).append(getLoad(rhs)).append("\t")
+                        .append(JasminUtils.getOp(instruction.getOperation())).append("\n");
+            }
+        }
         return binOp.toString();
+    }
+
+    private String dealWithCmp(Element lhs, Element rhs, String instSuffix, String type) {
+        StringBuilder cmp = new StringBuilder();
+        String firstLabel = type + JasminGenerator.condCounter++;
+        String secondLabel = type + JasminGenerator.condCounter++;
+
+        cmp.append(getLoad(lhs)).append(getLoad(rhs)).append("\tif_icmp").append(instSuffix).append(" ").append(firstLabel);
+
+        cmp.append("\n\t").append(getLoadInst(0)).append("0\n")
+                .append(getInstruction(new GotoInstruction(secondLabel))).append("\n").append(firstLabel).append(":\n\t")
+                .append(getLoadInst(1)).append("1\n").append(secondLabel)
+                .append(":\n");
+
+        return cmp.toString();
     }
 
     private String dealWithNop(SingleOpInstruction instruction) {
         return getLoad(instruction.getSingleOperand());
+    }
+
+    private String dealWithBranch(CondBranchInstruction instruction) {
+        StringBuilder branch = new StringBuilder();
+        Instruction condition = instruction.getCondition();
+        String label = instruction.getLabel();
+        branch.append(getInstruction(condition).strip()).append("\n\tifne ").append(label);
+        return branch.toString();
     }
 
     private String getLoad(Element element) {

@@ -9,9 +9,11 @@ public class JasminGenerator {
     public StringBuilder jasminCode;
     public static ClassUnit ollirClass;
     public static final HashMap<ElementType, String> simpleTypes = generateSimpleTypes();
+    public static int condCounter;
 
     public JasminGenerator(ClassUnit ollirClass) {
         this.jasminCode = new StringBuilder();
+        condCounter = 0;
         JasminGenerator.ollirClass = ollirClass;
     }
 

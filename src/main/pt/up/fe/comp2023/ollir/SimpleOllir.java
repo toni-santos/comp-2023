@@ -15,6 +15,7 @@ public class SimpleOllir implements JmmOptimization {
         ollirGenerator.visit(jmmSemanticsResult.getRootNode());
 
         String code = ollirGenerator.getCode();
+        System.out.println("code = " + code);
 
         return new OllirResult(jmmSemanticsResult, code, new ArrayList<>());
     }
