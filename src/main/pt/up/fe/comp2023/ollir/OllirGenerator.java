@@ -44,6 +44,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         addVisit("IntValue", this::dealWithIntValueExpression);
         addVisit("Identifier", this::dealWithIdentifierExpression);
         addVisit("NewObject", this::dealWithNewObject);
+        addVisit("NewArray", this::dealWithNewArray);
         addVisit("This", this::dealWithThisExpression);
         addVisit("Parenthesis", this::dealWithParenthesis);
         addVisit("BinaryOp", this::dealWithBinaryOpExpression);
@@ -56,6 +57,13 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         /*
         addVisit("NewArray", this::dealWithNewArray);
          */
+    }
+
+    private String dealWithNewArray(JmmNode jmmNode, OllirTemp ollirTemp) {
+        String arrayInit = visit(jmmNode.getJmmChild(0), new OllirTemp("", true));
+
+
+        return "new(array," + arrayInit + ")." + ollirTemp.getType();
     }
 
     private String dealWithParenthesis(JmmNode jmmNode, OllirTemp temp) {
@@ -76,13 +84,19 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
     private String dealWithLengthExpression(JmmNode jmmNode, OllirTemp temp) {
 
         String arrayName = visit(jmmNode.getJmmChild(0), new OllirTemp());
+        String string = "arraylength(" + arrayName + ").i32";
+        if (temp.isTemp()) {
+            String auxString = "aux" + this.auxNum.toString() + ".i32";
 
-        return "arraylength(" + arrayName + ").i32";
+            code.append(getIndent()).append(auxString).append(" :=").append(".i32").append(" ").append(string).append(";\n");
+            this.auxNum++;
+            return auxString;
+        }
+        return string;
     }
 
     private String dealWithMethodCallExpression(JmmNode jmmNode, OllirTemp temp) {
         String callerName = visit(jmmNode.getJmmChild(0), new OllirTemp(null, true));
-        System.out.println(jmmNode.getJmmChild(0));
         String methodName = jmmNode.get("value");
         String callerType, invokeMethod, returnType, argsString;
         ArrayList<String> args = new ArrayList<String>();
@@ -347,6 +361,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
             } else {
                 child = visit(jmmNode.getJmmChild(1), new OllirTemp(type, true));
             }
+            System.out.println(variableString);
 
             code.append(getIndent()).append(variableString).append(" :=.").append(type).append(" ").append(child).append(";\n");
         }
@@ -613,7 +628,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         List<String> stringList = Arrays.stream(string.split("\\.")).toList();
 
         if (stringList.get(1).equals("array")) {
-            return stringList.get(1) + stringList.get(2);
+            return stringList.get(1) + "." + stringList.get(2);
         }
         return stringList.get(1);
     }
