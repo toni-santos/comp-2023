@@ -71,14 +71,15 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
     }
 
     private String dealWithArraySubscriptExpression(JmmNode jmmNode, OllirTemp temp) {
-        String arrayName = visit(jmmNode.getJmmChild(0), new OllirTemp());
-        String arrayType = Arrays.stream(arrayName.split("\\.")).toList().get(0);
-        if (arrayType.equals("array")) {
-            arrayType = Arrays.stream(arrayName.split("\\.")).toList().get(1);
-        }
-        String arrayAccess = visit(jmmNode.getJmmChild(0), new OllirTemp(arrayType, true));
+        String arrayString = visit(jmmNode.getJmmChild(0), new OllirTemp());
+        // String arrayType = Arrays.stream(arrayName.split("\\.")).toList().get(1);
 
-        return arrayName + "[" + arrayAccess + "]." + arrayType;
+        String arrayType = getTypeFromString(arrayString);
+        String arrayElementType = Arrays.stream(arrayType.split("\\.")).toList().get(1);
+
+        String arrayAccess = visit(jmmNode.getJmmChild(1), new OllirTemp(arrayType, true));
+
+        return arrayString + "[" + arrayAccess + "]." + arrayElementType;
     }
 
     private String dealWithLengthExpression(JmmNode jmmNode, OllirTemp temp) {
@@ -255,11 +256,11 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
 
         String arrayType = getTypeFromString(arrayString);
         String arrayElementType = Arrays.stream(arrayType.split("\\.")).toList().get(1);
-        String bracketChild = visit(jmmNode.getJmmChild(0));
+        String bracketChild = visit(jmmNode.getJmmChild(0), new OllirTemp(".i32", true));
 
-        String child = visit(jmmNode.getJmmChild(1));
+        String child = visit(jmmNode.getJmmChild(1), new OllirTemp(arrayType, true));
 
-        code.append(arrayName).append("[").append(bracketChild).append("].").append(arrayElementType).append(" :=.").append(arrayElementType).append(" ").append(child).append(";\n");
+        code.append(getIndent()).append(arrayName).append("[").append(bracketChild).append("].").append(arrayElementType).append(" :=.").append(arrayElementType).append(" ").append(child).append(";\n");
 
         return "";
     }
@@ -361,7 +362,6 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
             } else {
                 child = visit(jmmNode.getJmmChild(1), new OllirTemp(type, true));
             }
-            System.out.println(variableString);
 
             code.append(getIndent()).append(variableString).append(" :=.").append(type).append(" ").append(child).append(";\n");
         }
@@ -629,6 +629,8 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
 
         if (stringList.get(1).equals("array")) {
             return stringList.get(1) + "." + stringList.get(2);
+        } else if (stringList.size() >= 3 && stringList.get(2).equals("array")) {
+            return stringList.get(2) + "." + stringList.get(3);
         }
         return stringList.get(1);
     }
