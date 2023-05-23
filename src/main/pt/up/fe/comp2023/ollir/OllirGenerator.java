@@ -458,7 +458,7 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
 
     private String dealWithWhileStatement(JmmNode jmmNode, OllirTemp temp) {
 
-        String whileCondition = visit(jmmNode.getJmmChild(0), new OllirTemp()); // possibly move to temp variable
+        String whileCondition = visit(jmmNode.getJmmChild(0), new OllirTemp("bool", true)); // possibly move to temp variable
 
         code.append(getIndent()).append("goto while_cond_").append(getWhileCount()).append(";\n");
         code.append(getIndent()).append("while_body_").append(getWhileCount()).append(":\n");
