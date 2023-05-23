@@ -54,14 +54,10 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         addVisit("ArraySubscript", this::dealWithArraySubscriptExpression);
         addVisit("While", this::dealWithWhileStatement);
         addVisit("IfElse", this::dealWithIfElseStatement);
-        /*
-        addVisit("NewArray", this::dealWithNewArray);
-         */
     }
 
     private String dealWithNewArray(JmmNode jmmNode, OllirTemp ollirTemp) {
         String arrayInit = visit(jmmNode.getJmmChild(0), new OllirTemp("", true));
-
 
         return "new(array," + arrayInit + ")." + ollirTemp.getType();
     }
@@ -72,14 +68,24 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
 
     private String dealWithArraySubscriptExpression(JmmNode jmmNode, OllirTemp temp) {
         String arrayString = visit(jmmNode.getJmmChild(0), new OllirTemp());
-        // String arrayType = Arrays.stream(arrayName.split("\\.")).toList().get(1);
 
         String arrayType = getTypeFromString(arrayString);
         String arrayElementType = Arrays.stream(arrayType.split("\\.")).toList().get(1);
 
         String arrayAccess = visit(jmmNode.getJmmChild(1), new OllirTemp(arrayType, true));
 
-        return arrayString + "[" + arrayAccess + "]." + arrayElementType;
+        String string = arrayString + "[" + arrayAccess + "]." + arrayElementType;
+
+        if (temp.isTemp()) {
+            String retType = arrayElementType;
+            String auxNumber = this.auxNum.toString();
+            String auxString = "aux" + auxNumber + "." + retType;
+            code.append(getIndent()).append(auxString).append(" :=.").append(retType).append(" ").append(string).append(";\n");
+            auxNum++;
+            return auxString;
+        }
+
+        return string;
     }
 
     private String dealWithLengthExpression(JmmNode jmmNode, OllirTemp temp) {
@@ -154,7 +160,12 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
                     returnType = ".V";
                 }
             } else {
-                returnType = addDot(temp.getType());
+                List<String> typeList = Arrays.stream(temp.getType().split("\\.")).toList();
+                if (typeList.get(0).equals("array")) {
+                    returnType = addDot(typeList.get(1));
+                } else {
+                    returnType = addDot(temp.getType());
+                }
             }
 
             string = invokeMethod + "(" + callerName + ", " + "\"" + methodName + "\"" + argsString + ")"+ returnType;
