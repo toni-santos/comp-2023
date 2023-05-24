@@ -8,18 +8,25 @@ import java.util.*;
 
 public class ConstantPropagation extends AJmmVisitor<String, String> {
     private Map<String, String> varNameValueMap = new HashMap();
+    private boolean changed;
 
     @Override
     protected void buildVisitor() {
         setDefaultVisit(this::dealNext);
 
+        addVisit("Program", this::dealWithProgram);
+        
+        addVisit("MethodDeclaration", this::dealWithMethodDeclaration);
+
         addVisit("DeclarationStatement", this::dealWithDeclarationStatement);
+
         addVisit("BinaryOp", this::dealWithBinaryOp);
         addVisit("UnaryOp", this::dealWithUnaryOp);
         addVisit("ReturnStatement", this::dealWithUnaryOp);
         addVisit("MethodCall", this::dealWithMethodCall);
         addVisit("IfElse", this::dealWithIfElse);
         addVisit("While", this::dealWithWhile);
+        addVisit("Brackets", this::dealWithBrackets);
 
         addVisit("IntValue", this::dealWithValue);
         addVisit("BooleanValue", this::dealWithValue);
@@ -27,7 +34,15 @@ public class ConstantPropagation extends AJmmVisitor<String, String> {
         addVisit("This", this::dealWithValue);
     }
 
-    private static void updateValue(JmmNode oldNode, String value, String kind) {
+    private String dealWithProgram(JmmNode jmmNode, String s) {
+        this.changed = false;
+        for (JmmNode child : jmmNode.getChildren()) {
+            visit(child);
+        }
+        return "";
+    }
+
+    private void updateValue(JmmNode oldNode, String value, String kind) {
         // create new node
         JmmNode newNode = new JmmNodeImpl(kind);
         newNode.put("value", value);
@@ -39,6 +54,30 @@ public class ConstantPropagation extends AJmmVisitor<String, String> {
         parent.removeJmmChild(oldNode);
         parent.add(newNode, idx);
         newNode.setParent(parent);
+        this.changed = true;
+    }
+
+    private void resetScope() {
+        this.varNameValueMap.clear();
+    }
+
+    private String dealWithBrackets(JmmNode jmmNode, String s) {
+        for (int i = 0; i < jmmNode.getNumChildren(); i++) {
+            Map<String, String> preStatementMap = this.varNameValueMap;
+            JmmNode statement = jmmNode.getJmmChild(i);
+            visit(statement);
+            this.varNameValueMap = preStatementMap;
+        }
+
+        return "";
+    }
+
+    private String dealWithMethodDeclaration(JmmNode jmmNode, String s) {
+        for (JmmNode child : jmmNode.getChildren()) {
+            visit(child);
+        }
+        resetScope();
+        return "";
     }
 
     private String dealWithWhile(JmmNode jmmNode, String s) {
@@ -51,6 +90,11 @@ public class ConstantPropagation extends AJmmVisitor<String, String> {
             String value = retChild;
             updateValue(jmmNode, value, kind);
         }
+
+        Map<String, String> preStatementMap = this.varNameValueMap;
+        JmmNode statement = jmmNode.getJmmChild(1);
+        visit(statement);
+        this.varNameValueMap = preStatementMap;
 
         return "";
     }
@@ -65,6 +109,16 @@ public class ConstantPropagation extends AJmmVisitor<String, String> {
             String value = retChild;
             updateValue(jmmNode, value, kind);
         }
+
+        Map<String, String> preThenMap = this.varNameValueMap;
+        JmmNode thenNode = jmmNode.getJmmChild(1);
+        visit(thenNode);
+        this.varNameValueMap = preThenMap;
+
+        Map<String, String> preElseMap = this.varNameValueMap;
+        JmmNode elseNode = jmmNode.getJmmChild(2);
+        visit(elseNode);
+        this.varNameValueMap = preElseMap;
 
         return "";
     }
@@ -149,4 +203,7 @@ public class ConstantPropagation extends AJmmVisitor<String, String> {
         return "";
     }
 
+    public boolean isChanged() {
+        return changed;
+    }
 }
