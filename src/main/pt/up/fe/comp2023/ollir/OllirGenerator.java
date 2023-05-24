@@ -54,6 +54,20 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         addVisit("ArraySubscript", this::dealWithArraySubscriptExpression);
         addVisit("While", this::dealWithWhileStatement);
         addVisit("IfElse", this::dealWithIfElseStatement);
+        addVisit("BooleanValue", this::dealWithBooleanValue);
+    }
+
+    private String dealWithBooleanValue(JmmNode jmmNode, OllirTemp ollirTemp) {
+        switch (jmmNode.get("value")) {
+            case "true" -> {
+                return "1.bool";
+            }
+            case "false" -> {
+                return "0.bool";
+            }
+        }
+
+        return "";
     }
 
     private String dealWithNewArray(JmmNode jmmNode, OllirTemp ollirTemp) {
@@ -414,6 +428,10 @@ public class OllirGenerator extends AJmmVisitor<OllirTemp, String> {
         // Statements & Return
         for (JmmNode child : jmmNode.getChildren().subList(localVariables.size(), jmmNode.getChildren().size())) {
             visit(child);
+        }
+
+        if (methodName.equals("main")) {
+            code.append(getIndent()).append("ret.V;\n");
         }
 
         decrementIndent();
