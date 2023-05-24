@@ -7,7 +7,11 @@ import java.util.Map;
 
 import pt.up.fe.comp.TestUtils;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
+import pt.up.fe.comp.jmm.ollir.JmmOptimization;
+import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp.jmm.parser.JmmParserResult;
+import pt.up.fe.comp2023.ollir.SimpleOllir;
+import pt.up.fe.comp2023.ollir.optimize.ConstantPropagation;
 import pt.up.fe.specs.util.SpecsIo;
 import pt.up.fe.specs.util.SpecsLogs;
 import pt.up.fe.specs.util.SpecsSystem;
@@ -46,6 +50,16 @@ public class Launcher {
         JmmSemanticsResult semanticsResult = analysis.semanticAnalysis(parserResult);
 
         TestUtils.noErrors(semanticsResult.getReports());
+
+        if (config.get("optimize").equals("true")) {
+            Optimizer optimizer = new Optimizer();
+            semanticsResult = optimizer.optimize(semanticsResult);
+        }
+
+        SimpleOllir ollir = new SimpleOllir();
+        OllirResult ollirResult = ollir.toOllir(semanticsResult);
+
+        TestUtils.noErrors(ollirResult.getReports());
     }
 
     private static Map<String, String> parseArgs(String[] args) {
@@ -56,12 +70,21 @@ public class Launcher {
             throw new RuntimeException("Expected a single argument, a path to an existing input file.");
         }
 
-        // Create config
         Map<String, String> config = new HashMap<>();
+
         config.put("inputFile", args[0]);
         config.put("optimize", "false");
         config.put("registerAllocation", "-1");
         config.put("debug", "false");
+
+        for (String arg: args) {
+            switch (arg) {
+                case "-o" -> {
+                    config.put("optimize", "true");
+                }
+            }
+        }
+
 
         return config;
     }

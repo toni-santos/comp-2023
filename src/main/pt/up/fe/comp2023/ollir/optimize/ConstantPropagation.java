@@ -5,10 +5,12 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.JmmNodeImpl;
 
 import java.util.*;
+import java.util.stream.Stream;
 
-public class ConstantPropagation extends AJmmVisitor<String, String> {
+public class ConstantPropagation extends AJmmVisitor<String, List<String>> {
     private Map<String, String> varNameValueMap = new HashMap();
     private boolean changed;
+    private boolean processWhile;
 
     @Override
     protected void buildVisitor() {
@@ -34,14 +36,6 @@ public class ConstantPropagation extends AJmmVisitor<String, String> {
         addVisit("This", this::dealWithValue);
     }
 
-    private String dealWithProgram(JmmNode jmmNode, String s) {
-        this.changed = false;
-        for (JmmNode child : jmmNode.getChildren()) {
-            visit(child);
-        }
-        return "";
-    }
-
     private void updateValue(JmmNode oldNode, String value, String kind) {
         // create new node
         JmmNode newNode = new JmmNodeImpl(kind);
@@ -61,149 +55,208 @@ public class ConstantPropagation extends AJmmVisitor<String, String> {
         this.varNameValueMap.clear();
     }
 
-    private String dealWithBrackets(JmmNode jmmNode, String s) {
-        for (int i = 0; i < jmmNode.getNumChildren(); i++) {
-            Map<String, String> preStatementMap = this.varNameValueMap;
-            JmmNode statement = jmmNode.getJmmChild(i);
-            visit(statement);
-            this.varNameValueMap = preStatementMap;
+    private List<String> dealWithProgram(JmmNode jmmNode, String s) {
+        this.changed = false;
+        for (JmmNode child : jmmNode.getChildren()) {
+            visit(child);
         }
-
-        return "";
+        return new ArrayList<>();
     }
 
-    private String dealWithMethodDeclaration(JmmNode jmmNode, String s) {
+    private List<String> dealWithBrackets(JmmNode jmmNode, String s) {
+        List<String> varList = new ArrayList<>();
+        Map<String, String> preBracketMap = this.varNameValueMap;
+
+        // Visit brackets content
+        for (int i = 0; i < jmmNode.getNumChildren(); i++) {
+            JmmNode statement = jmmNode.getJmmChild(i);
+            List<String> visitRet = visit(statement);
+            if (statement.getKind().equals("DeclarationStatement") && !varList.contains(visitRet.get(0))) {
+                varList.add(visitRet.get(0));
+            } else if (statement.getKind().equals("IfElse") || statement.getKind().equals("While")) {
+                // visitRet -> variables changed inside if/while
+                // add them to the list of changed variables
+                varList = mergeLists(varList, visitRet);
+            }
+        }
+
+        // Return map to previous scope
+        if (!jmmNode.getJmmParent().getKind().equals("IfElse"))
+            this.varNameValueMap = preBracketMap;
+
+        return varList;
+    }
+
+    private List<String> dealWithMethodDeclaration(JmmNode jmmNode, String s) {
         for (JmmNode child : jmmNode.getChildren()) {
             visit(child);
         }
         resetScope();
-        return "";
+        return new ArrayList<>();
     }
 
-    private String dealWithWhile(JmmNode jmmNode, String s) {
+    private List<String> dealWithWhile(JmmNode jmmNode, String s) {
+        if (!processWhile) {
+            return new ArrayList<>();
+        }
+
         JmmNode child = jmmNode.getJmmChild(0);
 
-        String retChild = visit(child);
+        List<String> retChild = visit(child);
 
-        if (varNameValueMap.containsKey(retChild)) {
+        if (!retChild.isEmpty() && varNameValueMap.containsKey(retChild.get(0))) {
             String kind = child.getKind();
-            String value = retChild;
+            String value = retChild.get(0);
             updateValue(jmmNode, value, kind);
         }
 
         Map<String, String> preStatementMap = this.varNameValueMap;
-        JmmNode statement = jmmNode.getJmmChild(1);
-        visit(statement);
+
+        // Loop
+        JmmNode statementNode = jmmNode.getJmmChild(1);
+        List<String> statementVars = visit(statementNode);
+
+        // Returning map to stable state
+        for (String varName : preStatementMap.keySet()) {
+            if (statementVars.contains(varName))
+                preStatementMap.remove(varName);
+        }
+
         this.varNameValueMap = preStatementMap;
 
-        return "";
+        return new ArrayList<>();
     }
 
-    private String dealWithIfElse(JmmNode jmmNode, String s) {
+    private List<String> dealWithIfElse(JmmNode jmmNode, String s) {
+        // If condition
         JmmNode child = jmmNode.getJmmChild(0);
 
-        String retChild = visit(child);
+        List<String> retChild = visit(child);
 
-        if (varNameValueMap.containsKey(retChild)) {
+        if (!retChild.isEmpty() && varNameValueMap.containsKey(retChild.get(0))) {
             String kind = child.getKind();
-            String value = retChild;
+            String value = retChild.get(0);
             updateValue(jmmNode, value, kind);
         }
 
-        Map<String, String> preThenMap = this.varNameValueMap;
+        Map<String, String> preIfMap = this.varNameValueMap;
+
+        // Then
         JmmNode thenNode = jmmNode.getJmmChild(1);
-        visit(thenNode);
-        this.varNameValueMap = preThenMap;
+        List<String> thenVars = visit(thenNode);
 
-        Map<String, String> preElseMap = this.varNameValueMap;
+        // Else
         JmmNode elseNode = jmmNode.getJmmChild(2);
-        visit(elseNode);
-        this.varNameValueMap = preElseMap;
+        List<String> elseVars = visit(elseNode);
 
-        return "";
+        // Returning map to stable state
+        for (String varName : preIfMap.keySet()) {
+            if (thenVars.contains(varName) || elseVars.contains(varName))
+                preIfMap.remove(varName);
+        }
+
+        // Update the variables map so that only the unaltered ones remain
+        this.varNameValueMap = preIfMap;
+
+        return mergeLists(thenVars, elseVars);
     }
 
-    private String dealWithMethodCall(JmmNode jmmNode, String s) {
+    private List<String> dealWithMethodCall(JmmNode jmmNode, String s) {
         if (jmmNode.getNumChildren() >= 2) {
             for (int i = 1; i < jmmNode.getNumChildren(); i++) {
                 JmmNode child = jmmNode.getJmmChild(i);
-                String retChild = visit(child);
-                if (varNameValueMap.containsKey(retChild)) {
+                List<String> retChild = visit(child);
+                if (!retChild.isEmpty() && varNameValueMap.containsKey(retChild.get(0))) {
                     String kind = child.getKind();
-                    String value = retChild;
+                    String value = retChild.get(0);
                     updateValue(jmmNode, value, kind);
                 }
             }
         }
 
-        return "";
+        return new ArrayList<>();
     }
 
-    private String dealWithUnaryOp(JmmNode jmmNode, String s) {
+    private List<String> dealWithUnaryOp(JmmNode jmmNode, String s) {
         JmmNode child = jmmNode.getJmmChild(0);
 
-        String retChild = visit(child);
+        List<String> retChild = visit(child);
 
-        if (varNameValueMap.containsKey(retChild)) {
+        if (!retChild.isEmpty() && varNameValueMap.containsKey(retChild.get(0))) {
             String kind = child.getKind();
-            String value = retChild;
+            String value = retChild.get(0);
             updateValue(jmmNode, value, kind);
         }
 
-        return "";
+        return new ArrayList<>();
     }
 
-    private String dealWithBinaryOp(JmmNode jmmNode, String s) {
+    private List<String> dealWithBinaryOp(JmmNode jmmNode, String s) {
         JmmNode left = jmmNode.getJmmChild(0);
         JmmNode right = jmmNode.getJmmChild(1);
 
-        String retLeft = visit(left);
-        String retRight = visit(right);
+        List<String> retLeft = visit(left);
+        List<String> retRight = visit(right);
 
-        if (varNameValueMap.containsKey(retLeft)) {
+        if (!retLeft.isEmpty() && varNameValueMap.containsKey(retLeft.get(0))) {
             String kind = left.getKind();
-            String value = retLeft;
+            String value = retLeft.get(0);
             updateValue(jmmNode, value, kind);
         }
 
-        if (varNameValueMap.containsKey(retRight)) {
+        if (!retRight.isEmpty() && varNameValueMap.containsKey(retRight.get(0))) {
             String kind = right.getKind();
-            String value = retRight;
+            String value = retRight.get(0);
             updateValue(jmmNode, value, kind);
         }
 
-        return "";
+        return new ArrayList<>();
     }
 
-    private String dealWithDeclarationStatement(JmmNode jmmNode, String s) {
+    private List<String> dealWithDeclarationStatement(JmmNode jmmNode, String s) {
         JmmNode childVar = jmmNode.getJmmChild(0);
         JmmNode childVal = jmmNode.getJmmChild(1);
 
         if (childVar.hasAttribute("array")) {
-            return "";
+            return new ArrayList<>();
         }
 
         String varName = childVar.get("value");
-        String varValue = visit(childVal);
+        List<String> varValue = visit(childVal);
 
-        if (!varValue.equals(""))
-            varNameValueMap.put(varName, varValue);
+        if (!varValue.isEmpty())
+            varNameValueMap.put(varName, varValue.get(0));
 
-        return "";
+        return Arrays.asList(varName);
     }
 
-    private String dealWithValue(JmmNode jmmNode, String s) {
-        return jmmNode.get("value");
+    private List<String> dealWithValue(JmmNode jmmNode, String s) {
+        return Arrays.asList(jmmNode.get("value"));
     }
 
-    private String dealNext(JmmNode jmmNode, String s) {
+    private List<String> dealNext(JmmNode jmmNode, String s) {
         for (JmmNode child : jmmNode.getChildren()) {
             visit(child);
         }
-        return "";
+        return new ArrayList<>();
     }
 
     public boolean isChanged() {
         return changed;
+    }
+
+    private List<String> mergeLists(List<String> l1, List<String> l2) {
+        List<String> combinedList = new ArrayList<>();
+        combinedList.addAll(l1);
+        combinedList.addAll(l2);
+
+        Set<String> combinedSet = new LinkedHashSet<>(combinedList);
+        List<String> result = new ArrayList<>(combinedSet);
+
+        return result;
+    }
+
+    public void setProcessWhile(boolean processWhile) {
+        this.processWhile = processWhile;
     }
 }
