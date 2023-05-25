@@ -104,8 +104,8 @@ public class ConstantFolding extends AJmmVisitor<String, String> {
 
             }
             case "<" -> {
-                Integer valLeft = Integer.getBoolean(retLeft);
-                Integer valRight = Integer.getBoolean(retRight);
+                Integer valLeft = Integer.valueOf(retLeft);
+                Integer valRight = Integer.valueOf(retRight);
                 newBooleanValue = valLeft < valRight ? "true" : "false";
                 newKind = "BooleanValue";
 
