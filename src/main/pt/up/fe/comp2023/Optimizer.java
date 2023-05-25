@@ -3,12 +3,14 @@ package pt.up.fe.comp2023;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.ollir.JmmOptimization;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
+import pt.up.fe.comp2023.ollir.SimpleOllir;
 import pt.up.fe.comp2023.ollir.optimize.ConstantFolding;
 import pt.up.fe.comp2023.ollir.optimize.ConstantPropagation;
 
 public class Optimizer implements JmmOptimization {
     @Override
     public JmmSemanticsResult optimize(JmmSemanticsResult semanticsResult) {
+        if (!semanticsResult.getConfig().containsKey("optimize")) return semanticsResult;
         ConstantPropagation constantPropagation = new ConstantPropagation();
         ConstantFolding constantFolding = new ConstantFolding();
 
@@ -26,7 +28,11 @@ public class Optimizer implements JmmOptimization {
 
     @Override
     public OllirResult toOllir(JmmSemanticsResult jmmSemanticsResult) {
-        return null;
+        
+        SimpleOllir ollir = new SimpleOllir();
+        OllirResult ollirResult = ollir.toOllir(jmmSemanticsResult);
+
+        return ollirResult;
     }
 
     @Override

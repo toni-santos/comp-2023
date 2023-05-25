@@ -37,6 +37,16 @@ public class ConstantPropagation extends AJmmVisitor<String, List<String>> {
     }
 
     private void updateValue(JmmNode oldNode, String value, String kind) {
+        if (value.equals("this")) {
+            kind = "This";
+        } else if (value.equals("true") || value.equals("false")) {
+            kind = "BooleanValue";
+        } else if (value.matches("[0]|[1-9][0-9]*")) {
+            kind = "IntValue";
+        } else {
+            kind = "Identifier";
+        }
+
         // create new node
         JmmNode newNode = new JmmNodeImpl(kind);
         newNode.put("value", value);
@@ -48,6 +58,7 @@ public class ConstantPropagation extends AJmmVisitor<String, List<String>> {
         parent.removeJmmChild(oldNode);
         parent.add(newNode, idx);
         newNode.setParent(parent);
+        System.out.println("children = " + parent.getChildren().get(0).getAttributes());
         this.changed = true;
     }
 
@@ -106,8 +117,8 @@ public class ConstantPropagation extends AJmmVisitor<String, List<String>> {
 
         if (!retChild.isEmpty() && varNameValueMap.containsKey(retChild.get(0))) {
             String kind = child.getKind();
-            String value = retChild.get(0);
-            updateValue(jmmNode, value, kind);
+            String value = varNameValueMap.get(retChild.get(0));
+            updateValue(child, value, kind);
         }
 
         Map<String, String> preStatementMap = this.varNameValueMap;
@@ -135,8 +146,8 @@ public class ConstantPropagation extends AJmmVisitor<String, List<String>> {
 
         if (!retChild.isEmpty() && varNameValueMap.containsKey(retChild.get(0))) {
             String kind = child.getKind();
-            String value = retChild.get(0);
-            updateValue(jmmNode, value, kind);
+            String value = varNameValueMap.get(retChild.get(0));
+            updateValue(child, value, kind);
         }
 
         Map<String, String> preIfMap = this.varNameValueMap;
@@ -168,8 +179,8 @@ public class ConstantPropagation extends AJmmVisitor<String, List<String>> {
                 List<String> retChild = visit(child);
                 if (!retChild.isEmpty() && varNameValueMap.containsKey(retChild.get(0))) {
                     String kind = child.getKind();
-                    String value = retChild.get(0);
-                    updateValue(jmmNode, value, kind);
+                    String value = varNameValueMap.get(retChild.get(0));
+                    updateValue(child, value, kind);
                 }
             }
         }
@@ -184,8 +195,8 @@ public class ConstantPropagation extends AJmmVisitor<String, List<String>> {
 
         if (!retChild.isEmpty() && varNameValueMap.containsKey(retChild.get(0))) {
             String kind = child.getKind();
-            String value = retChild.get(0);
-            updateValue(jmmNode, value, kind);
+            String value = varNameValueMap.get(retChild.get(0));
+            updateValue(child, value, kind);
         }
 
         return new ArrayList<>();
@@ -200,14 +211,14 @@ public class ConstantPropagation extends AJmmVisitor<String, List<String>> {
 
         if (!retLeft.isEmpty() && varNameValueMap.containsKey(retLeft.get(0))) {
             String kind = left.getKind();
-            String value = retLeft.get(0);
-            updateValue(jmmNode, value, kind);
+            String value = varNameValueMap.get(retLeft.get(0));
+            updateValue(left, value, kind);
         }
 
         if (!retRight.isEmpty() && varNameValueMap.containsKey(retRight.get(0))) {
             String kind = right.getKind();
-            String value = retRight.get(0);
-            updateValue(jmmNode, value, kind);
+            String value = varNameValueMap.get(retRight.get(0));
+            updateValue(right, value, kind);
         }
 
         return new ArrayList<>();
@@ -231,6 +242,7 @@ public class ConstantPropagation extends AJmmVisitor<String, List<String>> {
     }
 
     private List<String> dealWithValue(JmmNode jmmNode, String s) {
+        System.out.println(jmmNode.getAttributes());
         return Arrays.asList(jmmNode.get("value"));
     }
 
