@@ -67,7 +67,7 @@ public class ConstantFolding extends AJmmVisitor<String, String> {
         String retLeft = visit(left, "fromOp");
         String retRight = visit(right, "fromOp");
 
-        if ( (!isInteger(retLeft) && !isInteger(retRight)) && (!isBoolean(retLeft) && !isBoolean(retRight)) ) {
+        if ( (!isInteger(retLeft) || !isInteger(retRight)) && (!isBoolean(retLeft) || !isBoolean(retRight)) ) {
             return "";
         }
 
@@ -104,6 +104,7 @@ public class ConstantFolding extends AJmmVisitor<String, String> {
 
             }
             case "<" -> {
+                System.out.println(left);
                 Integer valLeft = Integer.valueOf(retLeft);
                 Integer valRight = Integer.valueOf(retRight);
                 newBooleanValue = valLeft < valRight ? "true" : "false";
