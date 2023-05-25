@@ -74,6 +74,10 @@ public class ConstantFolding extends AJmmVisitor<String, String> {
         Integer newIntegerValue = null;
         String newBooleanValue  = null;
 
+        if (!retLeft.matches("[0]|[1-9][0-9]*") || !retRight.matches("[0]|[1-9][0-9]*")) {
+            return "";
+        }
+
         switch (jmmNode.get("op")) {
             case "*" -> {
                 Integer valLeft = Integer.getInteger(retLeft);
@@ -81,13 +85,13 @@ public class ConstantFolding extends AJmmVisitor<String, String> {
                 newIntegerValue = valLeft * valRight;
             }
             case "/" -> {
-                Integer valLeft = Integer.getInteger(retLeft);
-                Integer valRight = Integer.getInteger(retRight);
+                Integer valLeft = Integer.valueOf(retLeft);
+                Integer valRight = Integer.valueOf(retRight);
                 newIntegerValue = valLeft / valRight;
             }
             case "+" -> {
-                Integer valLeft = Integer.getInteger(retLeft);
-                Integer valRight = Integer.getInteger(retRight);
+                Integer valLeft = Integer.valueOf(retLeft);
+                Integer valRight = Integer.valueOf(retRight);
                 newIntegerValue = valLeft + valRight;
             }
             case "-" -> {

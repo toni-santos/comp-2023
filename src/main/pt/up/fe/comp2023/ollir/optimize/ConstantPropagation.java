@@ -107,35 +107,69 @@ public class ConstantPropagation extends AJmmVisitor<String, List<String>> {
     }
 
     private List<String> dealWithWhile(JmmNode jmmNode, String s) {
-        if (!processWhile) {
-            return new ArrayList<>();
-        }
-
-        JmmNode child = jmmNode.getJmmChild(0);
-
-        List<String> retChild = visit(child);
-
-        if (!retChild.isEmpty() && varNameValueMap.containsKey(retChild.get(0))) {
-            String kind = child.getKind();
-            String value = varNameValueMap.get(retChild.get(0));
-            updateValue(child, value, kind);
-        }
-
+        JmmNode cond = jmmNode.getJmmChild(0);
+        // Save original map
         Map<String, String> preStatementMap = this.varNameValueMap;
 
-        // Loop
+        // Find variables used in the condition
+        List<String> condVars = processWhileCondition(cond);
+
+        // Visit the loop without any knowledge
+        resetScope();
         JmmNode statementNode = jmmNode.getJmmChild(1);
         List<String> statementVars = visit(statementNode);
 
-        // Returning map to stable state
-        for (String varName : preStatementMap.keySet()) {
-            if (statementVars.contains(varName))
-                preStatementMap.remove(varName);
-        }
+        // Create a disjoint set of the vars used in the condition and inside the loop
+        Set<String> disjointVars = new HashSet<>();
+
+        for (String var : condVars)
+            if (!statementVars.contains(var)) {
+                disjointVars.add(var);
+            }
+
+        for (String var : statementVars)
+            if (!condVars.contains(var)) {
+                disjointVars.add(var);
+            }
+
+        // Create a new map only with values that may be changed
+        Map<String, String> changeableVars = new HashMap<>();
+        for (String var : preStatementMap.keySet())
+            if (disjointVars.contains(var))
+                changeableVars.put(var, preStatementMap.get(var));
+
+        // Visit and propagate the condition
+        this.varNameValueMap = changeableVars;
+        visit(cond);
+
+        // Reset the map to before the while withtout the variables that were (maybe) modified inside the loop
+        for (String var : preStatementMap.keySet())
+            if (statementVars.contains(var))
+                preStatementMap.remove(var);
 
         this.varNameValueMap = preStatementMap;
 
         return new ArrayList<>();
+    }
+
+    private List<String> processWhileCondition(JmmNode node) {
+        switch (node.getKind()) {
+            case "BinaryOp" -> {
+                JmmNode left = node.getJmmChild(0);
+                JmmNode right = node.getJmmChild(1);
+
+                List<String> leftVal = processWhileCondition(left);
+                List<String> rightVal = processWhileCondition(right);
+
+                return mergeLists(leftVal, rightVal);
+            }
+            case "Identifier" -> {
+                return Arrays.asList(node.get("value"));
+            }
+            default -> {
+                return processWhileCondition(node.getJmmChild(0));
+            }
+        }
     }
 
     private List<String> dealWithIfElse(JmmNode jmmNode, String s) {
