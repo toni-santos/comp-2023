@@ -5,6 +5,19 @@ import org.specs.comp.ollir.*;
 import java.util.HashMap;
 
 public class JasminUtils {
+    public static int maxStackLimit;
+    private static int currentStackLimit;
+
+    public static void updateStackLimits(int change) {
+        maxStackLimit = Math.max(currentStackLimit += change, maxStackLimit);
+        System.out.println("currentStackLimit = " + currentStackLimit);
+        System.out.println("maxStackLimit = " + maxStackLimit);
+    }
+
+    public static void resetStackLimits() {
+        currentStackLimit = 0;
+        maxStackLimit = 0;
+    }
     public static boolean isBetween(int integer, int lhs, int rhs) {
         return integer >= lhs && integer <= rhs;
     }

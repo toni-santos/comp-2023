@@ -38,7 +38,12 @@ public class JasminInstruction {
         Operand lhs = (Operand) instruction.getDest();
         Instruction rhs = instruction.getRhs();
         String operandName = lhs.getName();
-        if (rhs.getInstType() == InstructionType.BINARYOPER) {
+        if (lhs instanceof ArrayOperand array) {
+            assign.append("\taload").append(getVarNum(array.getName())).append("\n")
+                    .append(getLoad(array.getIndexOperands().get(0)));
+            JasminUtils.updateStackLimits(1);
+        }
+        else if (rhs.getInstType() == InstructionType.BINARYOPER) {
             BinaryOpInstruction expression = (BinaryOpInstruction) rhs;
             OperationType opType = expression.getOperation().getOpType();
             if (opType == OperationType.ADD || opType == OperationType.SUB) {
@@ -101,6 +106,7 @@ public class JasminInstruction {
         invokeCode = "\t" + invokeType.toString() + " " + className + "/" + methodName + "(" + argumentTypes + ")" + 
                 returnType;
         invoke.append(invokeCode);
+        JasminUtils.updateStackLimits(-operandList.size());
         return invoke.toString();
     }
 
@@ -121,12 +127,13 @@ public class JasminInstruction {
         else {
             String returnTypeName = ((ClassType) instruction.getReturnType()).getName();
             call.append("new ").append(JasminUtils.getClassWithImports(returnTypeName)).append("\n").append("\tdup\n");
+            JasminUtils.updateStackLimits(2);
         }
         return call.toString();
     }
 
     private String getArrayLength(CallInstruction instruction) {
-        return getLoad(instruction.getFirstArg()) + "arraylength";
+        return getLoad(instruction.getFirstArg()) + "\tarraylength";
     }
 
     private String dealWithGoto(GotoInstruction instruction) {
@@ -144,6 +151,7 @@ public class JasminInstruction {
     }
 
     private String dealWithPutfield(PutFieldInstruction instruction) {
+        JasminUtils.updateStackLimits(-2);
         return dealWithFieldInstruction(instruction, "putfield");
     }
 
@@ -185,6 +193,12 @@ public class JasminInstruction {
             case LTH -> {
                 return dealWithCmp(lhs, rhs, "lt", type.name());
             }
+            case LTE -> {
+                return dealWithCmp(lhs, rhs, "le", type.name());
+            }
+            case GTH -> {
+                return dealWithCmp(lhs, rhs, "gt", type.name());
+            }
             case GTE -> {
                 return dealWithCmp(lhs, rhs, "ge", type.name());
             }
@@ -193,6 +207,7 @@ public class JasminInstruction {
                         .append(JasminUtils.getOp(instruction.getOperation())).append("\n");
             }
         }
+        JasminUtils.updateStackLimits(-1);
         return binOp.toString();
     }
 
@@ -220,31 +235,39 @@ public class JasminInstruction {
         Instruction condition = instruction.getCondition();
         String label = instruction.getLabel();
         branch.append(getInstruction(condition).strip()).append("\n\tifne ").append(label);
+        JasminUtils.updateStackLimits(-1);
         return branch.toString();
     }
 
     private String getLoad(Element element) {
+        System.out.println("element = " + element);
         StringBuilder load = new StringBuilder();
         load.append("\t");
         ElementType elementType = JasminUtils.getElementType(element);
+        System.out.println("elementType = " + elementType);
 
         if (element.isLiteral()) {
             LiteralElement literalElement = (LiteralElement) element;
             int literal = Integer.parseInt(literalElement.getLiteral());
             load.append(getLoadInst(literal)).append(literal == -1 ? "m1" : literal);
+            JasminUtils.updateStackLimits(1);
         }
         else if (elementType == ElementType.INT32 ||
                 elementType == ElementType.BOOLEAN ||
                 elementType == ElementType.STRING) {
             String register = getVarNum(((Operand) element).getName());
             ElementType varType = getOperandElementType((Operand) element);
+            System.out.println("varType = " + varType);
             if (varType == ElementType.ARRAYREF) {
                 ArrayOperand arrayOperand = (ArrayOperand) element;
+                JasminUtils.updateStackLimits(1);
                 load.append("aload").append(register).append("\n").append(
                         getLoad(arrayOperand.getIndexOperands().get(0))).append("\tiaload");
+                JasminUtils.updateStackLimits(-1);
             }
             else {
                 load.append("iload").append(register);
+                JasminUtils.updateStackLimits(1);
             }
         }
         else if (elementType == ElementType.ARRAYREF ||
@@ -252,6 +275,7 @@ public class JasminInstruction {
                 elementType == ElementType.THIS) {
             String register = getVarNum(((Operand) element).getName());
             load.append("aload").append(register);
+            JasminUtils.updateStackLimits(1);
         }
         load.append("\n");
         return load.toString();
@@ -267,13 +291,16 @@ public class JasminInstruction {
             case INT32, BOOLEAN -> {
                 if (variableType == ElementType.ARRAYREF) {
                     store.append("iastore");
+                    JasminUtils.updateStackLimits(-3);
                 }
                 else {
                     store.append("istore").append(varNum);
+                    JasminUtils.updateStackLimits(-1);
                 }
             }
             case ARRAYREF, OBJECTREF, THIS, STRING -> {
                 store.append("astore").append(varNum);
+                JasminUtils.updateStackLimits(-1);
             }
             default -> { throw new NotImplementedException(lhsType.toString()); }
         }

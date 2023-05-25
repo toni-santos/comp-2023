@@ -4,6 +4,9 @@ import org.specs.comp.ollir.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class JasminMethod {
     public Method method;
@@ -56,17 +59,32 @@ public class JasminMethod {
 
     private String getMethodBody(Method method) {
         StringBuilder body = new StringBuilder();
+        StringBuilder instructionBody = new StringBuilder();
         ArrayList<Instruction> instructions = method.getInstructions();
-        body.append(getStackLimit());
+        JasminUtils.resetStackLimits();
         for (Instruction instruction : instructions) {
-            body.append(getInstructionWithLabels(instruction));
+            instructionBody.append(getInstructionWithLabels(instruction));
         }
+        body.append(getLimits()).append(instructionBody);
         if (instructions.get(instructions.size() - 1).getInstType() != InstructionType.RETURN) body.append("\n\treturn\n");
         return body.toString();
     }
 
-    private String getStackLimit() {
-        return "\t.limit stack 99\n\t.limit locals 99\n";
+    private String getLimits() {
+        return "\t.limit stack " + getStackLimit() + "\n\t.limit locals " + getLocalsLimit() + "\n";
+    }
+
+    private int getStackLimit() {
+        return JasminUtils.maxStackLimit;
+    }
+    private int getLocalsLimit() {
+        Set<Integer> registers = new HashSet<>();
+        registers.add(0);
+        System.out.println("method.getVarTable().values().stream().map(Descriptor::getVirtualReg).toList() = " + method.getVarTable().values().stream().map(Descriptor::getVirtualReg).toList());
+        for (Descriptor descriptor : method.getVarTable().values()) {
+            registers.add(descriptor.getVirtualReg());
+        }
+        return registers.size();
     }
 
     private String getInstructionWithLabels(Instruction instruction) {
@@ -81,6 +99,7 @@ public class JasminMethod {
             ElementType returnType = ((CallInstruction) instruction).getReturnType().getTypeOfElement();
             if (returnType != ElementType.VOID || ((CallInstruction) instruction).getInvocationType() == CallType.invokespecial) {
                 inst.append("\tpop\n");
+                JasminUtils.updateStackLimits(-1);
             }
         }
 
