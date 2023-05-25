@@ -58,7 +58,6 @@ public class ConstantPropagation extends AJmmVisitor<String, List<String>> {
         parent.removeJmmChild(oldNode);
         parent.add(newNode, idx);
         newNode.setParent(parent);
-        System.out.println("children = " + parent.getChildren().get(0).getAttributes());
         this.changed = true;
     }
 

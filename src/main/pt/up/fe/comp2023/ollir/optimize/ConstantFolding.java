@@ -9,7 +9,7 @@ import java.util.List;
 
 public class ConstantFolding extends AJmmVisitor<String, String> {
 
-    private List<String> kindList = Arrays.asList("#IntValue", "#BooleanValue");
+    private List<String> kindList = Arrays.asList("IntValue", "BooleanValue");
     private boolean changed;
 
     @Override
@@ -51,17 +51,18 @@ public class ConstantFolding extends AJmmVisitor<String, String> {
     private String dealWithUnaryOp(JmmNode jmmNode, String s) {
         JmmNode child = jmmNode.getJmmChild(0);
 
-        if (child.getKind().equals("#BooleanValue")) {
+        if (child.getKind().equals("BooleanValue")) {
             String childVal = visit(child);
 
             String newVal = childVal.equals("true") ? "false" : "true";
-            updateValue(jmmNode, newVal, child.getKind());
+            updateValue(jmmNode, newVal, "BooleanValue");
         }
 
         return "";
     }
 
     private String dealWithBinaryOp(JmmNode jmmNode, String s) {
+        System.out.println("jaksdjfkaljsdfkljnasdkljnfasd");
         JmmNode left = jmmNode.getJmmChild(0);
         JmmNode right = jmmNode.getJmmChild(1);
 
@@ -73,6 +74,7 @@ public class ConstantFolding extends AJmmVisitor<String, String> {
         String retRight = visit(right);
         Integer newIntegerValue = null;
         String newBooleanValue  = null;
+        String newKind = "";
 
         if (!retLeft.matches("[0]|[1-9][0-9]*") || !retRight.matches("[0]|[1-9][0-9]*")) {
             return "";
@@ -80,41 +82,52 @@ public class ConstantFolding extends AJmmVisitor<String, String> {
 
         switch (jmmNode.get("op")) {
             case "*" -> {
-                Integer valLeft = Integer.getInteger(retLeft);
-                Integer valRight = Integer.getInteger(retRight);
+                Integer valLeft = Integer.valueOf(retLeft);
+                Integer valRight = Integer.valueOf(retRight);
                 newIntegerValue = valLeft * valRight;
+                newKind = "IntValue";
             }
             case "/" -> {
                 Integer valLeft = Integer.valueOf(retLeft);
                 Integer valRight = Integer.valueOf(retRight);
                 newIntegerValue = valLeft / valRight;
+                newKind = "IntValue";
+
             }
             case "+" -> {
                 Integer valLeft = Integer.valueOf(retLeft);
                 Integer valRight = Integer.valueOf(retRight);
                 newIntegerValue = valLeft + valRight;
+                newKind = "IntValue";
+
             }
             case "-" -> {
                 Integer valLeft = Integer.getInteger(retLeft);
                 Integer valRight = Integer.getInteger(retRight);
                 newIntegerValue = valLeft - valRight;
+                newKind = "IntValue";
+
             }
             case "<" -> {
                 Integer valLeft = Integer.getInteger(retLeft);
                 Integer valRight = Integer.getInteger(retRight);
                 newBooleanValue = valLeft < valRight ? "true" : "false";
+                newKind = "BooleanValue";
+
             }
             case "&&" -> {
                 boolean valLeft = Boolean.getBoolean(retLeft);
                 boolean valRight = Boolean.getBoolean(retRight);
                 newBooleanValue = valLeft && valRight ? "true" : "false";
+                newKind = "BooleanValue";
+
             }
         }
 
         if (newIntegerValue != null) {
-            updateValue(jmmNode, String.valueOf(newIntegerValue), left.getKind());
+            updateValue(jmmNode, String.valueOf(newIntegerValue), newKind);
         } else if (newBooleanValue != null) {
-            updateValue(jmmNode, newBooleanValue, left.getKind());
+            updateValue(jmmNode, newBooleanValue, newKind);
         }
 
         return "";
