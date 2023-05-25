@@ -112,12 +112,10 @@ public class ConstantPropagation extends AJmmVisitor<String, List<String>> {
 
         // Find variables used in the condition
         List<String> condVars = processWhileCondition(cond);
-        System.out.println("condVars = " + condVars);
         // Visit the loop without any knowledge
         resetScope();
         JmmNode statementNode = jmmNode.getJmmChild(1);
         List<String> statementVars = visit(statementNode);
-        System.out.println("statementVars = " + statementVars);
 
         // Create a disjoint set of the vars used in the condition and inside the loop
         Set<String> disjointVars = new HashSet<>();
@@ -127,19 +125,15 @@ public class ConstantPropagation extends AJmmVisitor<String, List<String>> {
                 disjointVars.add(var);
             }
 
-        System.out.println("disjointVars = " + disjointVars);
 
         // Create a new map only with values that may be changed
         Map<String, String> changeableVars = new HashMap<>();
-        System.out.println("preStatementMap = " + preStatementMap);
 
         for (String var : preStatementMap.keySet()) {
-            System.out.println("var = " + var);
             if (disjointVars.contains(var))
                 changeableVars.put(var, preStatementMap.get(var));
 
         }
-        System.out.println("changeableVars = " + changeableVars);
         // Visit and propagate the condition
         this.varNameValueMap = changeableVars;
         visit(cond);
