@@ -70,6 +70,7 @@ public class ConstantPropagation extends AJmmVisitor<String, List<String>> {
         for (JmmNode child : jmmNode.getChildren()) {
             visit(child);
         }
+        resetScope();
         return new ArrayList<>();
     }
 
@@ -145,7 +146,7 @@ public class ConstantPropagation extends AJmmVisitor<String, List<String>> {
 
         this.varNameValueMap = preStatementMap;
 
-        return new ArrayList<>();
+        return changeableVars.keySet().stream().toList();
     }
 
     private List<String> processWhileCondition(JmmNode node) {
@@ -182,8 +183,7 @@ public class ConstantPropagation extends AJmmVisitor<String, List<String>> {
             String value = varNameValueMap.get(retChild.get(0));
             updateValue(child, value, kind);
         }
-
-        Map<String, String> preIfMap = this.varNameValueMap;
+        Map<String, String> preIfMap = new HashMap<>(this.varNameValueMap);
 
         // Then
         JmmNode thenNode = jmmNode.getJmmChild(1);
