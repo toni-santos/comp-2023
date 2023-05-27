@@ -1,5 +1,37 @@
 # Compilers Project
 
+## Group
+
+This project was developed by group 8D:
+ - António Santos, up202008004
+ - Pedro Silva, up202004985
+ - Pedro Nunes, up202004714
+
+## Developed Work
+
+Throughout this project's development we were able to meet the following:
+ - Develop a solid parser for JAVA-- code, including error handling and tree simplification
+ - Create a Symbol Table from the AST generated in parsing
+ - Implement Semantic Analysis ensuring robustness of the code and ensuring that following steps received accurate input
+ - Generate OLLIR and Jasmin code for arithmetic, method invocation, if-else conditions, while loops, ...
+ - Optimize the produced code using Constant Propagation and Folding (``-o`` flag) alongside Low-Cost instructions at the Jasmin code level
+
+From the proposed implementations only the following were not implemented:
+ - Register Allocation optimization (``-r`` flag)
+
+## Self evaluation
+
+We believe we have built a well-structured compiler that has met the requirements set out in the project description.
+
+### Project Grade: 18
+
+### Group Split
+- António Santos: 33%
+- Pedro Silva: 33%
+- Pedro Nunes: 33%
+
+---
+
 For this project, you need to install [Java](https://jdk.java.net/), [Gradle](https://gradle.org/install/), and [Git](https://git-scm.com/downloads/) (and optionally, a [Git GUI client](https://git-scm.com/downloads/guis), such as TortoiseGit or GitHub Desktop). Please check the [compatibility matrix](https://docs.gradle.org/current/userguide/compatibility.html) for Java and Gradle versions.
 
 ## Project setup
